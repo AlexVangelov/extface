@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  s_configureable_id: 
+  serial_boud_rate: 1
+  serial_data_length: 1
+  serial_parity_check: 1
+  serial_stop_bits: 1
+  serial_handshake: 1
+
+two:
+  s_configureable_id: 
+  serial_boud_rate: 1
+  serial_data_length: 1
+  serial_parity_check: 1
+  serial_stop_bits: 1
+  serial_handshake: 1

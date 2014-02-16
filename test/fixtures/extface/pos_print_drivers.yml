@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type: 
+  fiscal: false
+  autocutter: false
+
+two:
+  type: 
+  fiscal: false
+  autocutter: false

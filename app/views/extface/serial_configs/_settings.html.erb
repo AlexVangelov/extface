@@ -1,0 +1,17 @@
+<hr />
+<h4>Serial Settings:</h4>
+<%= f.label :serial_boud_rate %>
+<%= f.select :serial_boud_rate, Extface::SerialConfig::BOUD_RATES, { include_blank: true } %>
+<br />
+<%= f.label :serial_data_length %>
+<%= f.select :serial_data_length, Extface::SerialConfig::DATA_LENGTHS, { include_blank: true } %>
+<br />
+<%= f.label :serial_parity_check %>
+<%= f.select :serial_parity_check, Extface::SerialConfig::PARITY_CHECKS, { include_blank: true } %>
+<br />
+<%= f.label :serial_stop_bits %>
+<%= f.select :serial_stop_bits, Extface::SerialConfig::STOP_BITS, { include_blank: true } %>
+<br />
+<%= f.label :serial_handshake %>
+<%= f.select :serial_handshake, Extface::SerialConfig::HANDSHAKE, { include_blank: true } %>
+<hr />

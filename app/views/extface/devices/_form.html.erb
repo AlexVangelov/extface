@@ -1,0 +1,34 @@
+<%= form_for(@device) do |f| %>
+  <% if @device.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(@device.errors.count, "error") %> prohibited this device from being saved:</h2>
+
+      <ul>
+      <% @device.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+  
+  <h5>Extfaceable: <%= @device.inspect %></h5>
+
+  <div class="field">
+    <%= f.label :name %><br>
+    <%= f.text_field :name %>
+  </div>
+  <div class="field">
+    <%= f.label :driver %><br>
+    <% if @device.driveable.present? %>
+      <%= fields_for :serial_config do |fd| %>
+        <%= render 'extface/serial_configs/settings', f: fd if @device.driveable.serial?  %>
+      <% end %>
+    <% else %>
+      <%= f.button 'Star TSP200', type: :submit, name: :driver, value: 'Extface::Driver::StarTsp200' %>
+      <%= f.button 'Datecs FP550', type: :submit, name: :driver, value: 'Extface::Driver::StarTsp200' %>
+    <% end %>
+  </div>
+  <div class="actions">
+    <%= f.submit nil, name: :submit, value: :submit %>
+  </div>
+<% end %>
