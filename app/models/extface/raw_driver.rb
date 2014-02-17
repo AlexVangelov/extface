@@ -1,6 +1,6 @@
 module Extface
-  class RawDriver < ActiveRecord::Base
-    
+  class RawDriver < Extface::DriverBase
+    GROUP = 'RAW Communication'.freeze
     def send(data)
       raise "Not Impelmened"
     end

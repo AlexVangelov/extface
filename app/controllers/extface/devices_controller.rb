@@ -25,8 +25,7 @@ module Extface
     # POST /devices
     def create
       @device = extfaceable.extface_devices.new(device_params)
-      @device.driveable = params[:driver].constantize.new if params[:driver]
-      if params[:submit].present? && @device.save
+      if @device.save
         redirect_to @device, notice: 'Device was successfully created.'
       else
         render action: 'new'
@@ -56,7 +55,7 @@ module Extface
 
       # Only allow a trusted parameter "white list" through.
       def device_params
-        params.require(:device).permit(:uuid, :name, :driveable_id)
+        params.require(:device).permit(:uuid, :name, :driveable_id, :driveable_type)
       end
   end
 end

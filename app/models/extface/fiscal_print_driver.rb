@@ -1,6 +1,6 @@
 module Extface
-  class FiscalPrintDriver < ActiveRecord::Base
-    
+  class FiscalPrintDriver < Extface::DriverBase
+    GROUP = 'Fiscal Printers'.freeze
     def fiscal?
       true
     end

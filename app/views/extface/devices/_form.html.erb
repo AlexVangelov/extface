@@ -19,14 +19,7 @@
   </div>
   <div class="field">
     <%= f.label :driver %><br>
-    <% if @device.driveable.present? %>
-      <%= fields_for :serial_config do |fd| %>
-        <%= render 'extface/serial_configs/settings', f: fd if @device.driveable.serial?  %>
-      <% end %>
-    <% else %>
-      <%= f.button 'Star TSP200', type: :submit, name: :driver, value: 'Extface::Driver::StarTsp200' %>
-      <%= f.button 'Datecs FP550', type: :submit, name: :driver, value: 'Extface::Driver::StarTsp200' %>
-    <% end %>
+    <%= f.select :driveable_type, options_for_drivers, { include_blank: true }, class: 'form-control' %>
   </div>
   <div class="actions">
     <%= f.submit nil, name: :submit, value: :submit %>

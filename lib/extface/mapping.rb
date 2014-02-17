@@ -14,7 +14,7 @@ module Extface
       # :shop_id then find_by! :id => params[:shop_id]
       @i_find_key = @i_param[/^(#{@name}_|)(\w+)/,2]
       raise "#{@i_klass.name} has no method #{@i_find_key}" unless @i_klass.new.respond_to? @i_find_key
-      
+      raise "Did you forget to add 'has_extface_devices' in #{@i_klass.name} ?" unless @i_klass.new.respond_to? :extface_devices
       @i_extra_module = options[:controller_include].to_s.constantize if options[:controller_include].present?
     end
     
