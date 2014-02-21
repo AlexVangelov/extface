@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.name        = "extface"
   s.version     = Extface::VERSION
   s.authors     = ["Alex Vangelov"]
-  s.email       = ["alexandervangelov@gmail.com"]
-  s.homepage    = "http://matrixdoc.net"
+  s.email       = ["email@data.bg"]
+  s.homepage    = "http://github.com/AlexVangelov/extface"
   s.summary     = "External Interfaces for Cloud-Based Applications (Rails 4)"
   s.description = "Extface allows use of Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface"
 
