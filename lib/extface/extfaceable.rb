@@ -1,8 +1,17 @@
 module Extface
   module Extfaceable
-    def has_extface_devices
-      has_many :extface_devices, class_name: 'Extface::Device', as: :extfaceable
+    extend ActiveSupport::Concern
+    
+    def composite_id
+      "#{self.class.name}##{self.id}"
     end
+    
+    module ClassMethods
+      def has_extface_devices
+        has_many :extface_devices, class_name: 'Extface::Device', as: :extfaceable
+      end
+    end
+
   end
 end
-ActiveRecord::Base.extend Extface::Extfaceable
+ActiveRecord::Base.send :include, Extface::Extfaceable

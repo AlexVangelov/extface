@@ -1,7 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  type: 
+  type: Extface::Driver::RawSerial
 
 two:
-  type: 
+  type: Extface::Driver::RawSerial

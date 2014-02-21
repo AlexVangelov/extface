@@ -22,3 +22,35 @@
 
 <%= link_to 'Edit', edit_device_path(@device) %> |
 <%= link_to 'Back', devices_path %>
+<br />
+Client Pull URL: 
+<br />
+ <%= extface.pull_url(@device.uuid) %>
+<br />
+<%= link_to 'Print Test Page', test_page_device_path(@device), remote:true %>
+
+
+<h1>Jobs</h1>
+<table class='table'>
+  <thead>
+    <tr class='active'>
+      <th>Id</th>
+      <th>Created</th>
+      <th>Description</th>
+      <th>Error</th>
+      <th>Failed</th>
+      <th>Completed</th>
+      <th>Connected</th>
+    </tr>
+  </thead>
+ <% @device.jobs.last(10).each do |job|%>
+   <tr>
+     <td><%= job.id %></td>
+     <td><%= job.created_at %></td>
+     <td><%= job.description %></td>
+     <td><%= job.error %></td>
+     <td><%= job.failed_at %></td>
+     <td><%= job.completed_at %></td>
+     <td><%= job.connected_at %></td>
+   </tr>
+ <% end %>

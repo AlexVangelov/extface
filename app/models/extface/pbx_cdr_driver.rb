@@ -4,5 +4,9 @@ module Extface
     def calls
       raise "Not Impelmened"
     end
+    
+    def crd?
+      true
+    end
   end
 end

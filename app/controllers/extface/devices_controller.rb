@@ -6,7 +6,7 @@ module Extface
 
     # GET /devices
     def index
-      @devices = extfaceable.extface_devices.all
+      @devices = extfaceable.extface_devices.load
     end
 
     # GET /devices/1
@@ -16,10 +16,12 @@ module Extface
     # GET /devices/new
     def new
       @device = extfaceable.extface_devices.new
+      render action: :form
     end
 
     # GET /devices/1/edit
     def edit
+      render action: :form
     end
 
     # POST /devices
@@ -28,7 +30,7 @@ module Extface
       if @device.save
         redirect_to @device, notice: 'Device was successfully created.'
       else
-        render action: 'new'
+        render action: :form
       end
     end
 
@@ -37,7 +39,7 @@ module Extface
       if @device.update(device_params)
         redirect_to @device, notice: 'Device was successfully updated.'
       else
-        render action: 'edit'
+        render action: :form
       end
     end
 
@@ -45,6 +47,12 @@ module Extface
     def destroy
       @device.destroy
       redirect_to devices_url, notice: 'Device was successfully destroyed.'
+    end
+
+    def test_page
+      set_device
+      job = @device.driveable.print_test_page
+      render text: job_path(job)
     end
 
     private
@@ -55,7 +63,7 @@ module Extface
 
       # Only allow a trusted parameter "white list" through.
       def device_params
-        params.require(:device).permit(:uuid, :name, :driveable_id, :driveable_type)
+        params.require(:device).permit(:uuid, :name, :driver, :driveable_id, :driveable_type)
       end
   end
 end

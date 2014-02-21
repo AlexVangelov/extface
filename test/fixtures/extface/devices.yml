@@ -1,13 +1,13 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  uuid: MyString
-  name: MyString
-  interfaceable_id: 
-  driveable_id: 
+  uuid: MyUUID1
+  name: MyString1
+  extfaceable: one(Shop) 
+  driveable: one(Extface::PosPrintDriver) 
 
 two:
-  uuid: MyString
-  name: MyString
-  interfaceable_id: 
-  driveable_id: 
+  uuid: MyUUID2
+  name: MyString2
+  extfaceable: one(Shop)
+  driveable: one(Extface::RawDriver)

@@ -1,5 +1,12 @@
 Extface::Engine.routes.draw do
-  resources :devices
+  resources :jobs
 
-  root 'sse#index'
+  resources :devices do
+    resources :jobs, only: [:show]
+    get :test_page, on: :member
+  end
+  
+  get ':device_uuid' => 'handler#pull', as: :pull
+  post ':device_uuid' => 'handler#push', as: :push
+  root 'devices#index'
 end

@@ -1,17 +1,37 @@
-<hr />
-<h4>Serial Settings:</h4>
-<%= f.label :serial_boud_rate %>
-<%= f.select :serial_boud_rate, Extface::SerialConfig::BOUD_RATES, { include_blank: true } %>
-<br />
-<%= f.label :serial_data_length %>
-<%= f.select :serial_data_length, Extface::SerialConfig::DATA_LENGTHS, { include_blank: true } %>
-<br />
-<%= f.label :serial_parity_check %>
-<%= f.select :serial_parity_check, Extface::SerialConfig::PARITY_CHECKS, { include_blank: true } %>
-<br />
-<%= f.label :serial_stop_bits %>
-<%= f.select :serial_stop_bits, Extface::SerialConfig::STOP_BITS, { include_blank: true } %>
-<br />
-<%= f.label :serial_handshake %>
-<%= f.select :serial_handshake, Extface::SerialConfig::HANDSHAKE, { include_blank: true } %>
-<hr />
+<div class='panel panel-default'>
+  <div class="panel-heading">
+    <h3 class="panel-title"><%= t('.serial_settings') %></h3>
+  </div>
+  <div class='panel-body'>
+    <div class="form-group">
+      <%= f.label :boud_rate, class: 'col-sm-2 control-label' %>
+      <div class='col-sm-8'>
+        <%= f.select :serial_boud_rate, Extface::SerialConfig::BOUD_RATES, { include_blank: true }, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :data_length, class: 'col-sm-2 control-label' %>
+      <div class='col-sm-8'>
+        <%= f.select :serial_data_length, Extface::SerialConfig::DATA_LENGTHS, { include_blank: true }, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :parity_check, class: 'col-sm-2 control-label' %>
+      <div class='col-sm-8'>
+        <%= f.select :serial_parity_check, Extface::SerialConfig::PARITY_CHECKS, { include_blank: true }, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :stop_bits, class: 'col-sm-2 control-label' %>
+      <div class='col-sm-8'>
+        <%= f.select :serial_stop_bits, Extface::SerialConfig::STOP_BITS, { include_blank: true }, class: 'form-control' %>
+      </div>
+    </div>
+    <div class="form-group">
+      <%= f.label :handshake, class: 'col-sm-2 control-label' %>
+      <div class='col-sm-8'>
+        <%= f.select :serial_handshake, Extface::SerialConfig::HANDSHAKE, { include_blank: true }, class: 'form-control' %>
+      </div>
+    </div>
+  </div>
+</div>

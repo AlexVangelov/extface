@@ -1,33 +1,36 @@
-<h1>Listing devices</h1>
+<div class="page-header nav">
+  <%= link_to new_device_path, class: 'btn btn-default navbar-btn pull-right' do %>
+    + <%= t('.new') %>
+  <% end %>
+  <h3 class='navbar-text'>
+    <%= link_to extface.root_path do %>
+      Extface<sup>&hearts;</sup>
+    <% end %>
+    &raquo;
+    <%= t('.devices') %>
+  </h3>
+</div>
 
-<table>
+<table class="table table-condensed table-stripped">
   <thead>
-    <tr>
-      <th>Uuid</th>
-      <th>Name</th>
-      <th>Extfaceable</th>
-      <th>Driveable</th>
-      <th></th>
-      <th></th>
-      <th></th>
+    <tr class='active'>
+      <th><%= t('.name') %></th>
+      <th><%= t('.parent') %></th>
+      <th><%= t('.driver') %></th>
+      <th>&nbsp;</th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
-
   <tbody>
     <% @devices.each do |device| %>
       <tr>
-        <td><%= device.uuid %></td>
-        <td><%= device.name %></td>
-        <td><%= device.extfaceable %></td>
-        <td><%= device.driveable %></td>
-        <td><%= link_to 'Show', device %></td>
-        <td><%= link_to 'Edit', edit_device_path(device) %></td>
-        <td><%= button_to 'Destroy', device, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= link_to device.name, device %></td>
+        <td><%= device.extfaceable.composite_id %></td>
+        <td><%= device.driveable ? device.driveable.class::NAME : 'N/A' %></td>
+        <td class='text-right'><%= link_to 'Edit', edit_device_path(device), class: 'btn btn-primary btn-sm' %></td>
+        <td class='text-right'><%= button_to 'Delete', device, method: :delete, class: 'btn btn-danger btn-sm', data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
 
-<br>
-
-<%= link_to 'New Device', new_device_path %>

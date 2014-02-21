@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module Extface
-  class SseControllerTest < ActionController::TestCase
+  class JobTest < ActiveSupport::TestCase
     # test "the truth" do
     #   assert true
     # end

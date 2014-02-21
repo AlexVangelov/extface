@@ -1,0 +1,46 @@
+<%= form_for @device, html: { class: 'form-horizontal' } do |f| %>
+  <div class="page-header nav">
+    <%= f.button type: :submit, name: :submit, value: :submit, class: 'btn btn-primary navbar-btn pull-right' do %>
+      &#10003; <%= t( @device.new_record? ? '.create' : '.update' ) %>
+    <% end %>
+    <h3 class='navbar-text'>
+      <%= link_to extface.root_path do %>
+        Extface<sup>&hearts;</sup>
+      <% end %>
+      &raquo;
+      <%= link_to t('.devices'), devices_path %>
+      &raquo; 
+      <%= t( @device.new_record? ? '.new' : '.edit') %>
+    </h3>
+  </div>
+
+  <%= render 'object_errors', object: f.object %>
+
+  <%= form_group f, :name, :text_field %>
+
+  <div class="form-group">
+    <%= f.label :driver, class: 'col-sm-2 control-label' %>
+    <div class='col-sm-10 col-md-8'>
+      <% if @device.driveable.present? %>
+        <p class="form-control-static">
+          <%= link_to '#', class: 'btn btn-danger btn-sm pull-right' do %>
+            <%= t('.change_driver') %>
+          <% end %>
+          <%= @device.driveable.class::NAME %>
+        </p>
+      <% else %>
+        <%= f.select :driver, options_for_drivers, { include_blank: true }, class: 'form-control' %>
+      <% end %>
+    </div>
+  </div>
+  <%= fields_for :driveable do |fd| %>
+    <%= driver_settings fd, @device.driveable %>
+    <%= fields_for :serial_config do |fds| %>
+      <div class="form-group">
+        <div class='col-sm-offset-2 col-sm-10 col-md-8'>
+          <%= render 'extface/serial_configs/settings',  f: fds %>
+        </div>
+      </div>
+    <% end if @device.driveable.serial? %>
+  <% end if @device.driveable.present? %>
+<% end %>
