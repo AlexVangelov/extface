@@ -6,7 +6,7 @@ External Interfaces for Cloud-Based Applications (Rails 4)
 Using Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. 
 Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface.
 
-## It's just the beggining
+## It's just the beginning
 
     gem 'extface'
     
