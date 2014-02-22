@@ -16,24 +16,24 @@ module Extface
       else
         response.headers['Content-Type'] = 'text/event-stream'
         # find current job or get new one
-        redis = Redis.new
-        Timeout.timeout(2) do
-          if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
-            cookies.permanent[:extface] = job.id
-            p "Processing job #{job.id}"
-            list, data = redis.blpop(job.id, timeout: 1)
-            while data
-              response.stream.write data
-              redis.publish(job.id, "OK")
-              list, data = redis.blpop(job.id, timeout: 1)
+        Extface.redis_block do |r|
+          Timeout.timeout(2) do
+            if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
+              cookies.permanent[:extface] = job.id
+              p "Processing job #{job.id}"
+              list, data = r.blpop(job.id, timeout: 1)
+              while data
+                response.stream.write data
+                r.publish(job.id, "OK")
+                list, data = r.blpop(job.id, timeout: 1)
+              end
             end
-          end
-        end #timeout  
+          end #timeout 
+        end #redis block
       end
     rescue => e
       p "will continue next time #{e.message}"
     ensure
-      redis.quit
       response.stream.close
     end
     

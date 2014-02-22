@@ -5,6 +5,7 @@ PATH
       rails (~> 4.0.2)
       rdoc
       redis
+      redis-namespace
 
 GEM
   remote: https://rubygems.org/
@@ -67,6 +68,8 @@ GEM
     rdoc (4.1.1)
       json (~> 1.4)
     redis (3.0.7)
+    redis-namespace (1.4.1)
+      redis (~> 3.0.4)
     sprockets (2.11.0)
       hike (~> 1.2)
       multi_json (~> 1.0)

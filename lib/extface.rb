@@ -2,6 +2,8 @@ require "extface/engine"
 require "extface/routes"
 require "extface/mapping"
 require "extface/extfaceable"
+require "extface/extfaceable"
+require "redis-namespace"
 module Extface
   mattr_accessor :redis_connection_string
   
@@ -21,7 +23,7 @@ module Extface
     def redis_block
       r = redis_instance
       begin
-        yield r
+        yield Redis::Namespace.new(:extface, :redis => r)
       ensure
         r.quit
       end
