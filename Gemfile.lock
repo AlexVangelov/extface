@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.0.2)
+    extface (0.0.3)
       rails (~> 4.0.2)
       rdoc
       redis
