@@ -11,6 +11,15 @@
   </h3>
 </div>
 <br />
+<% if @job.present? %>
+  <div class='alert alert-info job-monitor'>
+    See job #<%= @job.id %> execution progress at: <%= link_to job_url(@job), job_path(@job), target: :_blank %>
+    <div>
+      <div class='text-danger'>You need multi-threaded server to do that!</div>
+      <small>(Easiest workaraund: Include <%= link_to 'unicorn-rails', 'https://github.com/samuelkadolph/unicorn-rails', target: :_blank %> in your application)</small>
+    </div>
+  </div>
+<% end %>
 <div class='row'>
   <div class='col-sm-6'>
     <dl class="dl-horizontal">

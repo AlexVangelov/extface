@@ -86,3 +86,8 @@ Create `config/initializers/extface.rb`:
     Extface.setup do |config|
       #config.redis_connection_string = "redis://username:password@my.host:6389"
     end
+
+
+## Views & Layout
+
+Views as designed for twitter bootstrap CSS. Engine layout can be replaced by creating `app/views/layouts/extface/application.html.erb` in your engine/main_app.

@@ -54,6 +54,10 @@ module Extface
       response.stream.close
     end
     
+    def settings
+      render text: 'settings'
+    end
+    
     private
       def device
         @device ||= extfaceable.extface_devices.find_by(uuid: params[:device_uuid])

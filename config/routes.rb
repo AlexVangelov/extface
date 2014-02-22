@@ -7,6 +7,7 @@ Extface::Engine.routes.draw do
   end
   
   get ':device_uuid' => 'handler#pull', as: :pull
+  get ':device_uuid/settings' => 'handler#settings', as: :settings
   post ':device_uuid' => 'handler#push', as: :push
   root 'devices#index'
 end

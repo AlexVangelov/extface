@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     extface (0.0.5)
-      rails (~> 4.0.2)
+      rails (~> 4.0.3)
       rdoc
       redis
       redis-namespace

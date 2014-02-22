@@ -39,6 +39,8 @@ module Extface
             p line
           end
           job.failed! e.message
+        ensure
+          ActiveRecord::Base.connection.close
         end
       end
       job
