@@ -5,6 +5,7 @@ External Interfaces for Cloud-Based Applications (Rails 4)
 
 Using Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. 
 Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface.
+Extface allows multiple jobs to be executed in queue, and privides job execution monitor through Server-Sent Events.
 
 ## It's just the beginning
 
@@ -13,6 +14,8 @@ Can also be used for remotely reading CDR logs from PBX systems and actually sup
     bundle install
     
     bundle exec rake extface:install:migrations
+    
+Communication with devices is realized through Redis server, so it is required. Read more down.
     
 To add external interfaces to `Shop` model, use mapper `extface_for` in `config/routes.rb`, example:
 
@@ -56,3 +59,28 @@ It is focused on the following tasks:
   Reliability.
   Low consumption of server and client resources.
   Maintenance of a large number of protocols and devices.
+
+
+## Rails engines
+
+Extface is intended to work properly with multiple instances in rails engines. Possible routing mappers:
+
+    resources :shops do
+      extface_for :shop, interfaceable_type: 'Market::Shop', controller_include: 'Market::ShopController'
+    end
+    
+Where `Market::ShopController` is Module that includes application before actions, like authentication, set locale and what ever.
+
+    scope ':shop_uuid' do
+      extface_for :shop, interfaceable_type: 'Market::Shop', interfaceable_param: :shop_uuid, controller_include: 'Market::ShopController'
+    end
+    
+This will mount extface at `market/:shop_uuid/shop_extface` and will try to find shop instance by `Market::Shop.find_by(uuid: params[:shop_uuid])`
+
+## Redis connection string
+
+Create `config/initializers/extface.rb`:
+
+    Extface.setup do |config|
+      #config.redis_connection_string = "redis://username:password@my.host:6389"
+    end
