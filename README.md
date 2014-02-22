@@ -5,7 +5,7 @@ External Interfaces for Cloud-Based Applications (Rails 4)
 
 Using Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. 
 Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface.
-Extface allows multiple jobs to be executed in queue, and privides job execution monitor through Server-Sent Events.
+Extface allows multiple jobs to be executed in queue, and privides job progress monitor through Server-Sent Events.
 
 ## It's just the beginning
 

@@ -1,34 +1,60 @@
-<p id="notice"><%= notice %></p>
-
-<p>
-  <strong>Uuid:</strong>
-  <%= @device.uuid %>
-</p>
-
-<p>
-  <strong>Name:</strong>
-  <%= @device.name %>
-</p>
-
-<p>
-  <strong>Extfaceable:</strong>
-  <%= @device.extfaceable %>
-</p>
-
-<p>
-  <strong>Driveable:</strong>
-  <%= @device.driveable %>
-</p>
-
-<%= link_to 'Edit', edit_device_path(@device) %> |
-<%= link_to 'Back', devices_path %>
+<div class="page-header nav">
+  <%= link_to 'Edit', edit_device_path(@device), class: 'btn btn-primary navbar-btn pull-right' %> 
+  <h3 class='navbar-text'>
+    <%= link_to extface.root_path do %>
+      Extface<sup>&hearts;</sup>
+    <% end %>
+    &raquo;
+    <%= link_to t('.devices'), devices_path %>
+    &raquo; 
+    <%= @device.name %>
+  </h3>
+</div>
 <br />
-Client Pull URL: 
-<br />
- <%= extface.pull_url(@device.uuid) %>
-<br />
-<%= link_to 'Print Test Page', test_page_device_path(@device), remote:true %>
+<div class='row'>
+  <div class='col-sm-6'>
+    <dl class="dl-horizontal">
+      <dt><%= t('.name') %></dt>
+      <dd><%= @device.name %></dd>
+      
+      <dt><%= t('.parent') %></dt>
+      <dd><%= @device.extfaceable.composite_id %></dd>
+      
+      <dt><%= t('.driver') %></dt>
+      <dd><%= @device.driver_name %></dd>
+    </dl>
+  </div>
+  <div class='col-sm-6'>
+    <dl class="dl-horizontal">
+      <dt><%= t('.created') %></dt>
+      <dd><%= distance_of_time_in_words_to_now @device.created_at %> ago</dd>
+      
+      <dt><%= t('.successful_jobs') %></dt>
+      <dd>
+        <%= @device.jobs.count %>
+        (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:completed_at) %> ago)
+      </dd>
+      
+      <dt><%= t('.failures') %></dt>
+      <dd>
+        <%= @device.jobs.count %>
+        (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:failed_at) %> ago)
+      </dd>
+      
 
+    </dl>
+  </div>
+</div>
+
+<dl class="dl-horizontal">
+  <dt><%= t('.client_pull_url') %></dt>
+  <dd><pre><%= extface.pull_url(@device.uuid) %></pre></dd>
+</dl>
+
+<hr />
+<% if @device.print? %>
+  <%= button_to 'Print Test Page', test_page_device_path(@device), remote: true, name: :test_page, value: true, class: 'btn btn-warning' %>
+<% end %>
 
 <h1>Jobs</h1>
 <table class='table'>
@@ -43,7 +69,7 @@ Client Pull URL:
       <th>Connected</th>
     </tr>
   </thead>
- <% @device.jobs.last(10).each do |job|%>
+ <% @device.jobs.last(10).reverse.each do |job|%>
    <tr>
      <td><%= job.id %></td>
      <td><%= job.created_at %></td>

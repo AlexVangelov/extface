@@ -13,7 +13,7 @@
       <%= t( @device.new_record? ? '.new' : '.edit') %>
     </h3>
   </div>
-
+  <br />
   <%= render 'object_errors', object: f.object %>
 
   <%= form_group f, :name, :text_field %>

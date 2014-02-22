@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Extface</title>
+  <title>Extface&hearts;</title>
   <%= stylesheet_link_tag    "extface/application", media: "all" %>
+  <%= stylesheet_link_tag "http://getbootstrap.com/dist/css/bootstrap.min.css", medis: :all %>
   <%= javascript_include_tag "extface/application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
-
-<%= yield %>
-
+  <div class="container">
+    <%= yield %>
+  </div>
 </body>
 </html>

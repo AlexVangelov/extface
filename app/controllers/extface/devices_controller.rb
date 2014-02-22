@@ -51,8 +51,8 @@ module Extface
 
     def test_page
       set_device
-      job = @device.driveable.print_test_page
-      render text: job_path(job)
+      @job = @device.driveable.print_test_page if params[:test_page]
+      render action: :show
     end
 
     private
