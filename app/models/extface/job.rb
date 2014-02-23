@@ -3,6 +3,8 @@ module Extface
     belongs_to :device, inverse_of: :jobs
     
     scope :active, ->{ where(arel_table[:completed_at].eq(nil).and(arel_table[:failed_at].eq(nil))) }
+    scope :completed, ->{ where(arel_table[:completed_at].not_eq(nil)) }
+    scope :failed, ->{ where(arel_table[:failed_at].not_eq(nil)) }
     
     def complete!
       self.completed_at = Time.now
