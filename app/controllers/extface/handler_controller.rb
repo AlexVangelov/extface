@@ -32,7 +32,11 @@ module Extface
         end #redis block
       end
     rescue => e
-      p "will continue next time #{e.message}"
+      if e.instance_of? Timeout::Error
+        p "will continue next time #{e.message}"
+      else
+        render nothing: true, status: :internal_server_error
+      end
     ensure
       response.stream.close
     end
