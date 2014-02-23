@@ -22,6 +22,7 @@ module Extface
               cookies.permanent[:extface] = job.id
               p "Processing job #{job.id}"
               list, data = r.blpop(job.id, timeout: 1)
+              #TODO rescue here will loose data
               while data
                 response.stream.write data
                 r.publish(job.id, "OK")

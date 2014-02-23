@@ -28,7 +28,7 @@ module Extface
     def push(buffer)
       
         if @job
-          Timeout.timeout(10) do
+          Timeout.timeout(Extface.device_timeout) do
             Extface.redis_block do |r|
               r.subscribe(@job.id) do |on| #blocking until delivered
                 on.subscribe do |channel, subscriptions|

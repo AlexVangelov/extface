@@ -10,6 +10,9 @@ module Extface
   mattr_reader :mappings
   @@mappings = ActiveSupport::OrderedHash.new
   
+  mattr_reader :device_timeout
+  @@device_timeout = 10
+  
   class << self
     def setup
       yield self
