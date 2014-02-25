@@ -1,0 +1,166 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Extface♥</title>
+  <meta name="description" content="External Interfaces for Cloud-Based Applications (Rails 4)">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Extface♥</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">External Interfaces for Cloud-Based Applications (Rails 4)</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/AlexVangelov/extface/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/AlexVangelov/extface/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/AlexVangelov/extface" class="code">View Extface♥ on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
+<a name="extface" class="anchor" href="#extface"><span class="octicon octicon-link"></span></a>Extface<sup>♥</sup>
+</h1>
+
+<p>External Interfaces for Cloud-Based Applications (Rails 4)</p>
+
+<p>Using Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. 
+Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface.
+Extface allows multiple jobs to be executed in queue, and privides job progress monitor through Server-Sent Events.</p>
+
+<h2>
+<a name="its-just-the-beginning" class="anchor" href="#its-just-the-beginning"><span class="octicon octicon-link"></span></a>It's just the beginning</h2>
+
+<pre><code>gem 'extface'
+
+bundle install
+
+bundle exec rake extface:install:migrations
+
+bundle exec rake db:migrate
+</code></pre>
+
+<p>Communication with devices is realized through Redis server, so it is required. Read more down.</p>
+
+<p>To add external interfaces to <code>Shop</code> model, use mapper <code>extface_for</code> in <code>config/routes.rb</code>, example:</p>
+
+<pre><code>resources :shops do 
+  extface_for :shop
+end
+</code></pre>
+
+<p>Add <code>has_extface_devices</code> in your <code>/app/models/shop.rb</code></p>
+
+<p>Extface engine will be visible at <code>link_to 'Extface', shop_extface_path(@shop)</code></p>
+
+<p>Create a device with driver <code>Generic Pos Print</code>.
+Copy the <code>Pull URL</code>, visible on device's show page.</p>
+
+<p>To simulate client side of the system you can use bash script (replace the URL with your one):</p>
+
+<pre><code>while true; do RESULT=$(curl -u extface:extface -c extface -b extface -s http://localhost:3000/shops/1/shop_extface/bb6ac841cf239ab89b967352c40e4b39); if [ -z "$RESULT" ]; then sleep 5; else echo -e "$RESULT"; sleep 1; fi done
+</code></pre>
+
+<p>Hit The <code>Print Test Page</code> and you will see result in you console.</p>
+
+<p>Output can be forwarded to real device by adding <code>&gt; /dev/ttyS0</code> at the end example script.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<pre><code>job = extface_device.session do |s|
+  s.print "some data\r\n"
+  10.times do |i|
+    s.print "Line #{i}\r\n"
+  end
+end
+</code></pre>
+
+<p>The result of this block returns immediately, and the job is executed in background.
+Job execution can be monitored with EventStream (SSE) at <code>extface.job_url(job)</code></p>
+
+<p>Extface is happy with Unicorn workers, even recommended it!</p>
+
+<p>The project is still in workflow development stage.
+It is focused on the following tasks:</p>
+
+<p>Easy and clear integration.
+  Reliability.
+  Low consumption of server and client resources.
+  Maintenance of a large number of protocols and devices.</p>
+
+<h2>
+<a name="rails-engines" class="anchor" href="#rails-engines"><span class="octicon octicon-link"></span></a>Rails engines</h2>
+
+<p>Extface is intended to work properly with multiple instances in rails engines. Possible routing mappers:</p>
+
+<pre><code>resources :shops do
+  extface_for :shop, interfaceable_type: 'Market::Shop', controller_include: 'Market::ShopController'
+end
+</code></pre>
+
+<p>Where <code>Market::ShopController</code> is Module that includes application before actions, like authentication, set locale and what ever.</p>
+
+<pre><code>scope ':shop_uuid' do
+  extface_for :shop, interfaceable_type: 'Market::Shop', interfaceable_param: :shop_uuid, controller_include: 'Market::ShopController'
+end
+</code></pre>
+
+<p>This will mount extface at <code>market/:shop_uuid/shop_extface</code> and will try to find shop instance by <code>Market::Shop.find_by(uuid: params[:shop_uuid])</code></p>
+
+<h2>
+<a name="redis-connection-string" class="anchor" href="#redis-connection-string"><span class="octicon octicon-link"></span></a>Redis connection string</h2>
+
+<p>Create <code>config/initializers/extface.rb</code>:</p>
+
+<pre><code>Extface.setup do |config|
+  #config.redis_connection_string = "redis://username:password@my.host:6389"
+  #config.device_timeout = 10 #seconds to wait before cancel the job if there is no activity on the device
+end
+</code></pre>
+
+<h2>
+<a name="views--layout" class="anchor" href="#views--layout"><span class="octicon octicon-link"></span></a>Views &amp; Layout</h2>
+
+<p>Views as designed for twitter bootstrap CSS. Engine layout can be replaced by creating <code>app/views/layouts/extface/application.html.erb</code> in your engine/main_app.</p>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/AlexVangelov" class="avatar"><img src="https://2.gravatar.com/avatar/69031fc504f2005cfc86ea0e3e1abdb6?d=https%3A%2F%2Fidenticons.github.com%2F59835bb9923f7ebfa14ae9209c173aa7.png&amp;r=x&amp;s=60" width="48" height="48"/></a> <a href="https://github.com/AlexVangelov">AlexVangelov</a> maintains <a href="https://github.com/AlexVangelov/extface">Extface♥</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/AlexVangelov/extface/tarball/master" class="tar">tar</a><a href="https://github.com/AlexVangelov/extface/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
