@@ -1,3 +1,7 @@
+## 0.0.8
+  - Fix device view
+  - HandlerController without Timeout rescue
+
 ## 0.0.7
   - config device_timeout
   - rescue error status in handler_controller (tell client not to process data)
