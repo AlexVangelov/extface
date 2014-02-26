@@ -5,10 +5,10 @@ module Extface
       raise "Not Impelmented"
     end
     
-    def print_test_page
+    def print_test_page(times = 1)
       device.session("Print Test Page") do |s|
-        sleep 1
-        s.notify "Printing Test Page"
+        times.times do |t|
+        s.notify "Printing Test Page #{t}"
         s.print "******************************\r\n"
         s.print "*  Extface Print Test Page   *\r\n"
         s.print "******************************\r\n"
@@ -33,6 +33,7 @@ module Extface
         
         if s.try(:autocutter?)
           s.autocut
+        end
         end
       end
     end
