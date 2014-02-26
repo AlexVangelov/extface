@@ -41,13 +41,17 @@
       <dt><%= t('.successful_jobs') %></dt>
       <dd>
         <%= @device.jobs.completed.count %>
-        (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:completed_at) %> ago)
+        <% if @device.jobs.completed.any? %>
+          (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:completed_at) %> ago)
+        <% end %>
       </dd>
       
       <dt><%= t('.failures') %></dt>
       <dd>
         <%= @device.jobs.failed.count %>
-        (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:failed_at) %> ago)
+        <% if @device.jobs.failed.any? %>
+          (<%= t('.last') %>: <%= distance_of_time_in_words_to_now @device.jobs.maximum(:failed_at) %> ago)
+        <% end %>
       </dd>
       
 
