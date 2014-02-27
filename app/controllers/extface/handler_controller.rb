@@ -1,7 +1,6 @@
 require_dependency "extface/application_controller"
 # while RESULT=$(curl -u extface:extface -c extface -b extface -s localhost:3003/parking/demo/park_extface/d894db672bc916676d3d004394343031); do if [ -z "$RESULT" ]; then sleep 5; else echo -e "$RESULT"; sleep 1; fi  done
 # while true; do RESULT=$(curl -u extface:extface -c extface -b extface -s localhost:3003/parking/demo/park_extface/d894db672bc916676d3d004394343031); if [ -z "$RESULT" ]; then sleep 5; else echo -e "$RESULT"; sleep 1; fi  done
-require "timeout"
 module Extface
   class HandlerController < ApplicationController
     include ActionController::Live
@@ -10,34 +9,33 @@ module Extface
     before_action :require_device
     
     def pull
-      # request.body.read usable?
+      # request.body.read usable? : YES! return number of bytes received by device
       unless device.present?
         render nothing: true, status: :not_found
       else
         response.headers['Content-Type'] = 'text/event-stream'
         # find current job or get new one
         Extface.redis_block do |r|
-          Timeout.timeout(2) do
+            start = Time.now
             if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
               cookies.permanent[:extface] = job.id
               p "Processing job #{job.id}"
               list, data = r.blpop(job.id, timeout: 1)
-              #TODO rescue here will loose data
               while data
                 response.stream.write data
                 r.publish(job.id, "OK")
+                if (Time.now - start) > 3.seconds
+                  p "Will continue next time"
+                  #break
+                end
                 list, data = r.blpop(job.id, timeout: 1)
               end
             end
-          end #timeout 
         end #redis block
       end
     rescue => e
-      if e.instance_of? Timeout::Error
-        p "will continue next time #{e.message}"
-      else
-        render nothing: true, status: :internal_server_error
-      end
+      p e.message
+      render nothing: true, status: :internal_server_error
     ensure
       response.stream.close
     end

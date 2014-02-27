@@ -9,9 +9,9 @@ module Extface
       device.session("Print Test Page") do |s|
         times.times do |t|
         s.notify "Printing Test Page #{t}"
-        s.print "******************************\r\n"
-        s.print "*  Extface Print Test Page   *\r\n"
-        s.print "******************************\r\n"
+        s.print "******************************\r\n*"
+        s.print "Extface Print Test #{t}".center(28)
+        s.print "*\r\n******************************\r\n"
 
         s.notify "Printing driver information"
         s.print "\r\nDriver:\r\n"
