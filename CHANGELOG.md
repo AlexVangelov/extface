@@ -1,3 +1,6 @@
+## 0.1.0
+  - Successfully tested pos printer Star SCP700
+
 ## 0.0.8
   - Fix device view
   - HandlerController without Timeout rescue
