@@ -1,166 +1,113 @@
-<!doctype html>
-<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
-<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="External Interfaces for Cloud-Based Applications">
+    <meta name="author" content="Alex Vangelov email@data.bg">
+    <link rel="shortcut icon" href="http://getbootstrap.com/assets/ico/favicon.ico">
 
-  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
-  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-  <script type="text/javascript" src="javascripts/script.js"></script>
+    <title>Extface♥</title>
 
-  <title>Extface♥</title>
-  <meta name="description" content="External Interfaces for Cloud-Based Applications (Rails 4)">
+    <!-- Bootstrap core CSS -->
+    <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+    <!-- Custom styles for this template -->
+    <link href="stylesheets/justified-nav.css" rel="stylesheet">
 
-</head>
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
 
-<body>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
 
-  <div class="wrapper">
-    <header>
-      <h1 class="title">Extface♥</h1>
-    </header>
-    <div id="container">
-      <p class="tagline">External Interfaces for Cloud-Based Applications (Rails 4)</p>
-      <div id="main" role="main">
-        <div class="download-bar">
-        <div class="inner">
-          <a href="https://github.com/AlexVangelov/extface/tarball/master" class="download-button tar"><span>Download</span></a>
-          <a href="https://github.com/AlexVangelov/extface/zipball/master" class="download-button zip"><span>Download</span></a>
-          <a href="https://github.com/AlexVangelov/extface" class="code">View Extface♥ on GitHub</a>
+  <body>
+
+    <div class="container">
+
+      <div class="masthead">
+        <h3 class="text-muted">Extface<sup>&hearts;</sup> (BETA)</h3>
+        <!-- <ul class="nav nav-justified">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">Projects</a></li>
+          <li><a href="#">Services</a></li>
+          <li><a href="#">Downloads</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul> -->
+      </div>
+
+      <!-- Jumbotron -->
+      <div class="jumbotron">
+        <h1>External Interfaces for Cloud-Based Applications</h1>
+        <p class="lead"><b>Extface<sup>&hearts;</sup></b> is a solution that provides control of hardware devices 
+          from web-based applications. It allows using of Cash Registers, Fiscal and POS printers without 
+          physical connection between the device, application server and the end user. 
+          Can also be used for reading CDR logs from PBX systems over the internet and actually 
+          supports data exchange with all low-speed devices having serial, parallel or USB* interface. 
+          Extface server can execute multiple jobs in queue, and privides job progress monitor.
+        </p>
+        <!-- <p><a class="btn btn-lg btn-success" href="#" role="button">Get started today</a></p> -->
+      </div>
+      <p>
+         &nbsp; &nbsp; &nbsp; This project is born as a component for my work on a 
+         Vehicle Services Cloud-based Software Suite, but I decided to let it go open source, 
+         couse I want to give it its own life. Hardware boards are not in mass production yet 
+         (I hope at some point become). Documentation is not ready, as I am still working on 
+         main workflow and doing beta tests. If you have any questions you can 
+         <a href='mailto:email@data.bg'>contact me</a> or join the 
+         <a href='https://github.com/AlexVangelov/extface'>Github project</a>.
+      </p>
+
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-4">
+          <h3>Rails 4 gem</h3>
+          <p>Server engine is realized as a Ruby on Rails gem package, which can be readily incorporated in existing projects. It is focused on the following tasks:</p>
+            <ul>
+              <li>Easy and clear integration.</li>
+              <li>Reliability.</li>
+              <li>Low consumption of server and client resources.</li>
+              <li>Maintenance of a large number of protocols and devices.</li>
+            </ul>
+          <!-- <p><a class="btn btn-primary" href="#">More &raquo;</a></p> -->
         </div>
-        <span class="blc"></span><span class="trc"></span>
+        <div class="col-md-4">
+          <h3>Hardware client</h3>
+          <p>Embedded board with Ethernet(RJ45) and Serial(DB9) Interface, that eliminates the need for computer to pair the device and Extface server. It has web interface for startup configuration and can be placed at any point with network access, also behind NAT. </p>
+          <a href="#" class="thumbnail">
+            <img src="images/extface_board.png" alt="Extface Hardware Board">
+          </a>
+          <!-- <p><a class="btn btn-primary" href="#">More &raquo;</a></p> -->
+       </div>
+        <div class="col-md-4">
+          <h3>Software client</h3>
+          <p>Windows and *Unix software client can be used for driver development, tests or in producion. It uses <a href='http://curl.haxx.se'>cURL</a> library for communication with Extface server and can work with console, file or with real device (COM, LPT, USB* or TTY). </p>
+          <!-- <p><a class="btn btn-primary" href="#">More &raquo;</a></p> -->
         </div>
-        <article class="markdown-body">
-          <h1>
-<a name="extface" class="anchor" href="#extface"><span class="octicon octicon-link"></span></a>Extface<sup>♥</sup>
-</h1>
-
-<p>External Interfaces for Cloud-Based Applications (Rails 4)</p>
-
-<p>Using Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. 
-Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface.
-Extface allows multiple jobs to be executed in queue, and privides job progress monitor through Server-Sent Events.</p>
-
-<h2>
-<a name="its-just-the-beginning" class="anchor" href="#its-just-the-beginning"><span class="octicon octicon-link"></span></a>It's just the beginning</h2>
-
-<pre><code>gem 'extface'
-
-bundle install
-
-bundle exec rake extface:install:migrations
-
-bundle exec rake db:migrate
-</code></pre>
-
-<p>Communication with devices is realized through Redis server, so it is required. Read more down.</p>
-
-<p>To add external interfaces to <code>Shop</code> model, use mapper <code>extface_for</code> in <code>config/routes.rb</code>, example:</p>
-
-<pre><code>resources :shops do 
-  extface_for :shop
-end
-</code></pre>
-
-<p>Add <code>has_extface_devices</code> in your <code>/app/models/shop.rb</code></p>
-
-<p>Extface engine will be visible at <code>link_to 'Extface', shop_extface_path(@shop)</code></p>
-
-<p>Create a device with driver <code>Generic Pos Print</code>.
-Copy the <code>Pull URL</code>, visible on device's show page.</p>
-
-<p>To simulate client side of the system you can use bash script (replace the URL with your one):</p>
-
-<pre><code>while true; do RESULT=$(curl -u extface:extface -c extface -b extface -s http://localhost:3000/shops/1/shop_extface/bb6ac841cf239ab89b967352c40e4b39); if [ -z "$RESULT" ]; then sleep 5; else echo -e "$RESULT"; sleep 1; fi done
-</code></pre>
-
-<p>Hit The <code>Print Test Page</code> and you will see result in you console.</p>
-
-<p>Output can be forwarded to real device by adding <code>&gt; /dev/ttyS0</code> at the end example script.</p>
-
-<h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
-
-<pre><code>job = extface_device.session do |s|
-  s.print "some data\r\n"
-  10.times do |i|
-    s.print "Line #{i}\r\n"
-  end
-end
-</code></pre>
-
-<p>The result of this block returns immediately, and the job is executed in background.
-Job execution can be monitored with EventStream (SSE) at <code>extface.job_url(job)</code></p>
-
-<p>Extface is happy with Unicorn workers, even recommended it!</p>
-
-<p>The project is still in workflow development stage.
-It is focused on the following tasks:</p>
-
-<p>Easy and clear integration.
-  Reliability.
-  Low consumption of server and client resources.
-  Maintenance of a large number of protocols and devices.</p>
-
-<h2>
-<a name="rails-engines" class="anchor" href="#rails-engines"><span class="octicon octicon-link"></span></a>Rails engines</h2>
-
-<p>Extface is intended to work properly with multiple instances in rails engines. Possible routing mappers:</p>
-
-<pre><code>resources :shops do
-  extface_for :shop, interfaceable_type: 'Market::Shop', controller_include: 'Market::ShopController'
-end
-</code></pre>
-
-<p>Where <code>Market::ShopController</code> is Module that includes application before actions, like authentication, set locale and what ever.</p>
-
-<pre><code>scope ':shop_uuid' do
-  extface_for :shop, interfaceable_type: 'Market::Shop', interfaceable_param: :shop_uuid, controller_include: 'Market::ShopController'
-end
-</code></pre>
-
-<p>This will mount extface at <code>market/:shop_uuid/shop_extface</code> and will try to find shop instance by <code>Market::Shop.find_by(uuid: params[:shop_uuid])</code></p>
-
-<h2>
-<a name="redis-connection-string" class="anchor" href="#redis-connection-string"><span class="octicon octicon-link"></span></a>Redis connection string</h2>
-
-<p>Create <code>config/initializers/extface.rb</code>:</p>
-
-<pre><code>Extface.setup do |config|
-  #config.redis_connection_string = "redis://username:password@my.host:6389"
-  #config.device_timeout = 10 #seconds to wait before cancel the job if there is no activity on the device
-end
-</code></pre>
-
-<h2>
-<a name="views--layout" class="anchor" href="#views--layout"><span class="octicon octicon-link"></span></a>Views &amp; Layout</h2>
-
-<p>Views as designed for twitter bootstrap CSS. Engine layout can be replaced by creating <code>app/views/layouts/extface/application.html.erb</code> in your engine/main_app.</p>
-        </article>
       </div>
-    </div>
-    <footer>
-      <div class="owner">
-      <p><a href="https://github.com/AlexVangelov" class="avatar"><img src="https://2.gravatar.com/avatar/69031fc504f2005cfc86ea0e3e1abdb6?d=https%3A%2F%2Fidenticons.github.com%2F59835bb9923f7ebfa14ae9209c173aa7.png&amp;r=x&amp;s=60" width="48" height="48"/></a> <a href="https://github.com/AlexVangelov">AlexVangelov</a> maintains <a href="https://github.com/AlexVangelov/extface">Extface♥</a></p>
 
-
+      <!-- Site footer -->
+      <div class="footer">
+        <p>
+          <a href="https://github.com/AlexVangelov" class="img-thumbnail">
+            <img src="https://2.gravatar.com/avatar/69031fc504f2005cfc86ea0e3e1abdb6?d=https%3A%2F%2Fidenticons.github.com%2F59835bb9923f7ebfa14ae9209c173aa7.png&amp;r=x&amp;s=60" width="48" height="48"/>
+          </a>
+          <a href="https://github.com/AlexVangelov">AlexVangelov</a> maintains 
+          <a href="https://github.com/AlexVangelov/extface">Extface<sup>&hearts;</sup></a>
+        </p>
       </div>
-      <div class="creds">
-        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
-      </div>
-    </footer>
-  </div>
-  <div class="current-section">
-    <a href="#top">Scroll to top</a>
-    <a href="https://github.com/AlexVangelov/extface/tarball/master" class="tar">tar</a><a href="https://github.com/AlexVangelov/extface/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
-    <p class="name"></p>
-  </div>
 
-  
-</body>
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+  </body>
 </html>
