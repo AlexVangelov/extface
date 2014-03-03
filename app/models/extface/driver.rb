@@ -6,9 +6,6 @@ module Extface
     GROUP = Extface::RAW_DRIVER
     
     DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
-
-    CAN_RECEСVE_DATA = true #pull from server
-    CAN_TRANSMIT_DATA = true #push to server
     
     # Select driver features
     RAW = true  #responds to #push(data) and #pull
