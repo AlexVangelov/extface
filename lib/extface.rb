@@ -5,6 +5,11 @@ require "extface/extfaceable"
 require "extface/extfaceable"
 require "redis-namespace"
 module Extface
+  RAW_DRIVER = "Raw Communication Devices"
+  PRINT_DRIVER = "Print Devices"
+  FISCAL_DRIVER = "Fiscal Printers & Cash Registers"
+  REPORT_DRIVER = "CDR Loggers, Report Devices"
+    
   mattr_accessor :redis_connection_string
   
   mattr_reader :mappings

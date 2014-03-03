@@ -3,6 +3,7 @@ module Extface
   class Driver < ActiveRecord::Base
     
     NAME = 'Extface Driver Base' #human driver name
+    GROUP = Extface::RAW_DRIVER
     
     DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
 
@@ -16,8 +17,6 @@ module Extface
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices
 
     DRIVER_TYPES = ['RAW', 'PRINT', 'FISCAL', 'REPORT'].freeze
-    
-    GROUP = "Raw"
     
     has_one :device, inverse_of: :driver
     

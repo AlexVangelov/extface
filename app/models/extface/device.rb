@@ -14,7 +14,13 @@ module Extface
     before_create do
       self.uuid = SecureRandom.hex
       self.name = uuid unless name.present?
-      self.driver = @driver_class.constantize.create if @driver_class.present?
+    end
+    
+    before_save do
+      if @driver_class.present? and @driver_class != driver_class.try(:to_s)
+        driver.try(:destroy)
+        self.driver = @driver_class.constantize.create if @driver_class.present?
+      end
     end
     
     def driver_class

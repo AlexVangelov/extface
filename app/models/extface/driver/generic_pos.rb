@@ -1,6 +1,7 @@
 module Extface
   class Driver::GenericPos < Extface::Driver
     NAME = 'Generic Pos Printer (Serial)'.freeze
+    GROUP = Extface::PRINT_DRIVER
     
     DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
 

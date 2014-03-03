@@ -21,15 +21,18 @@
   <div class="form-group">
     <%= f.label :driver, class: 'col-sm-2 control-label' %>
     <div class='col-sm-10 col-md-8'>
-      <% if @device.driver.present? %>
+      <% unless @device.driver.blank? || params[:driver_change] %>
         <p class="form-control-static">
-          <%= link_to '#', class: 'btn btn-danger btn-sm pull-right' do %>
+          <%= link_to edit_device_path(@device, driver_change: true), class: 'btn btn-danger btn-sm pull-right' do %>
             <%= t('.change_driver') %>
           <% end %>
           <%= @device.driver.class::NAME %>
         </p>
       <% else %>
         <%= f.select :driver_class, options_for_drivers, { include_blank: true }, class: 'form-control' %>
+        <% if @device.driver.present? %>
+          <span class='text-danger'>Driver change will destroy current driver configuration!</span>
+        <% end %>
       <% end %>
     </div>
   </div>

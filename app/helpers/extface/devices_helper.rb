@@ -1,21 +1,23 @@
 module Extface
   module DevicesHelper
     
-    def subdrivers(options, object)
-      object.subclasses.each do |s|
-        options << [s::NAME, s.name]
-        subdrivers(options, s) if s.subclasses.any?
+    def subdrivers(object)
+      [].tap do |drivers|
+        object.subclasses.each do |s|
+          drivers << s
+          drivers << subdrivers(s) if s.subclasses.any?
+        end
       end
-      return options
     end
     
     def options_for_drivers
-      Extface::Engine.eager_load!
-      {}.tap do |drivers|
-        Extface::Driver.subclasses.collect{ |type|
-          drivers[type::GROUP] = subdrivers(Array.new, type)
-        }
-      end
+      Extface::Engine.eager_load! if Rails.env.development?
+      [].tap do |drivers|
+        Extface::Driver.subclasses.each do |s|
+          drivers << s
+          drivers << subdrivers(s)
+        end
+      end.flatten.group_by{ |x| x::GROUP }.sort.collect{ |group, drivers| [group, drivers.collect{ |d| [d::NAME, d.to_s] }.sort ] }
     end
   end
 end
