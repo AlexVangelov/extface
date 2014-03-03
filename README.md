@@ -18,6 +18,9 @@ Extface allows multiple jobs to be executed in queue, and privides job progress 
     bundle exec rake db:migrate
     
 Communication with devices is realized through Redis server, so it is required. Read more down.
+
+Home page: [http://extface.com](http://extface.com)
+Demo application: [http://example-extface.rhcloud.com/](http://example-extface.rhcloud.com/)
     
 To add external interfaces to `Shop` model, use mapper `extface_for` in `config/routes.rb`, example:
 

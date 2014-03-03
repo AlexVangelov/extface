@@ -1,5 +1,7 @@
-## 0.1.2
+## 0.1.3
+  - Created demo application at OpenShift
   - Fix invalid multibyte character
+  - require `bundle exec rake extface:install:migrations && bundle exec rake db:migrate`
 
 ## 0.1.1
   - Remove rdoc, rails 4.0.3 dependancy
