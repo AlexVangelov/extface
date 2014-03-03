@@ -35,9 +35,9 @@ module Extface
       job = jobs.create!(description: description)
       Thread.new do
         begin
-          raise 'No driver configured' unless driveable.present?
-          driveable.set_job(job)
-          yield driveable
+          raise 'No driver configured' unless driver.present?
+          driver.set_job(job)
+          yield driver
           job.complete!
         rescue => e
           STDERR.puts e.message
