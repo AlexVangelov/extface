@@ -1,28 +1,28 @@
 module Extface
   class Device < ActiveRecord::Base
-    attr_writer :driver
+    attr_writer :driver_class
     belongs_to :extfaceable, polymorphic: true
-    belongs_to :driveable, polymorphic: true
+    belongs_to :driver, inverse_of: :device
     has_many :jobs, inverse_of: :device
     
-    accepts_nested_attributes_for :driveable
+    accepts_nested_attributes_for :driver
     
-    delegate :print?, :fiscal?, :raw?, :cdr?, to: :driveable, allow_nil: true
+    delegate :print?, :fiscal?, :raw?, :report?, to: :driver, allow_nil: true
     
     validates_uniqueness_of :name, :uuid, scope: [:extfaceable_id, :extfaceable_type]
     
     before_create do
       self.uuid = SecureRandom.hex
       self.name = uuid unless name.present?
-      self.driveable = @driver.constantize.create if @driver.present?
+      self.driver = @driver_class.constantize.create if @driver_class.present?
     end
     
-    def driver
-      driveable.try(:class)
+    def driver_class
+      driver.try(:class)
     end
     
     def driver_name
-      driver::NAME if driver
+      driver_class::NAME if driver_class
     end
 
     def session(description = nil)

@@ -9,15 +9,14 @@ Gem::Specification.new do |s|
   s.version     = Extface::VERSION
   s.authors     = ["Alex Vangelov"]
   s.email       = ["email@data.bg"]
-  s.homepage    = "http://github.com/AlexVangelov/extface"
+  s.homepage    = "http://extface.com"
   s.summary     = "External Interfaces for Cloud-Based Applications (Rails 4)"
   s.description = "Extface allows use of Cash Registers, Fiscal and POS printers without physical connection between the device, application server and the end user. Can also be used for remotely reading CDR logs from PBX systems and actually supports data exchange with all low-speed devices having serial, parallel or USB* interface"
 
   s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.rdoc"]
   s.test_files = Dir["test/**/*"]
 
-  s.add_dependency "rails", "~> 4.0.3"
-  s.add_dependency "rdoc"
+  s.add_dependency "rails", ">= 4.0.1"
   s.add_dependency "redis"
   s.add_dependency "redis-namespace"
 

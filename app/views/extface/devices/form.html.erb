@@ -21,26 +21,26 @@
   <div class="form-group">
     <%= f.label :driver, class: 'col-sm-2 control-label' %>
     <div class='col-sm-10 col-md-8'>
-      <% if @device.driveable.present? %>
+      <% if @device.driver.present? %>
         <p class="form-control-static">
           <%= link_to '#', class: 'btn btn-danger btn-sm pull-right' do %>
             <%= t('.change_driver') %>
           <% end %>
-          <%= @device.driveable.class::NAME %>
+          <%= @device.driver.class::NAME %>
         </p>
       <% else %>
-        <%= f.select :driver, options_for_drivers, { include_blank: true }, class: 'form-control' %>
+        <%= f.select :driver_class, options_for_drivers, { include_blank: true }, class: 'form-control' %>
       <% end %>
     </div>
   </div>
-  <%= fields_for :driveable do |fd| %>
-    <%= driver_settings fd, @device.driveable %>
+  <%= fields_for :driver do |fd| %>
+    <%= driver_settings fd, @device.driver %>
     <%= fields_for :serial_config do |fds| %>
       <div class="form-group">
         <div class='col-sm-offset-2 col-sm-10 col-md-8'>
           <%= render 'extface/serial_configs/settings',  f: fds %>
         </div>
       </div>
-    <% end if @device.driveable.serial? %>
-  <% end if @device.driveable.present? %>
+    <% end if @device.driver.serial? %>
+  <% end if @device.driver.present? %>
 <% end %>

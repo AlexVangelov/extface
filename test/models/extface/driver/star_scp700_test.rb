@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module Extface
-  class RawDriverTest < ActiveSupport::TestCase
+  class Driver::StarScp700Test < ActiveSupport::TestCase
     # test "the truth" do
     #   assert true
     # end

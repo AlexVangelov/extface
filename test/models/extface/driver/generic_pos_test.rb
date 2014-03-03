@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module Extface
-  class PosPrintDriverTest < ActiveSupport::TestCase
+  class Driver::GenericPosTest < ActiveSupport::TestCase
     # test "the truth" do
     #   assert true
     # end

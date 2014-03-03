@@ -1,3 +1,6 @@
+## 0.1.1
+  - Remove rdoc, rails 4.0.3 dependancy
+
 ## 0.1.0
   - Successfully tested pos printer Star SCP700
 

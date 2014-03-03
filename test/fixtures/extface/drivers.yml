@@ -1,0 +1,10 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+generic_pos:
+  type: Extface::Driver::GenericPos
+
+star_tsp200:
+  type: Extface::Driver::StarTsp200
+
+star_scp700:
+  type: Extface::Driver::StarScp700

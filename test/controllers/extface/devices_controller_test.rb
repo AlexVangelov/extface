@@ -19,7 +19,7 @@ module Extface
 
     test "should create device" do
       assert_difference('Device.count') do
-        post :create, shop_id: @device.extfaceable, use_route: :extface, device: { driver: 'Extface::Driver::RawSerial' }
+        post :create, shop_id: @device.extfaceable, use_route: :extface, device: { driver_class: 'Extface::Driver::GenericPos' }
       end
 
       assert_redirected_to device_path(assigns(:device))

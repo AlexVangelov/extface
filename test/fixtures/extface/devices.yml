@@ -4,10 +4,10 @@ one:
   uuid: MyUUID1
   name: MyString1
   extfaceable: one(Shop) 
-  driveable: one(Extface::PosPrintDriver) 
+  driver: generic_pos
 
 two:
   uuid: MyUUID2
   name: MyString2
   extfaceable: one(Shop)
-  driveable: one(Extface::RawDriver)
+  driver: star_scp700

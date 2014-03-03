@@ -11,23 +11,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140221203517) do
+ActiveRecord::Schema.define(version: 20140303123022) do
 
   create_table "extface_devices", force: true do |t|
     t.string   "uuid"
     t.string   "name"
     t.integer  "extfaceable_id"
     t.string   "extfaceable_type"
-    t.integer  "driveable_id"
-    t.string   "driveable_type"
+    t.integer  "driver_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  add_index "extface_devices", ["driveable_id", "driveable_type"], name: "index_extface_devices_on_driveable_id_and_driveable_type"
-
-  create_table "extface_fiscal_print_drivers", force: true do |t|
+  create_table "extface_drivers", force: true do |t|
     t.string   "type"
+    t.text     "settings"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -45,27 +43,8 @@ ActiveRecord::Schema.define(version: 20140221203517) do
 
   add_index "extface_jobs", ["device_id"], name: "index_extface_jobs_on_device_id"
 
-  create_table "extface_pbx_cdr_drivers", force: true do |t|
-    t.string   "type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "extface_pos_print_drivers", force: true do |t|
-    t.string   "type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
-  create_table "extface_raw_drivers", force: true do |t|
-    t.string   "type"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "extface_serial_configs", force: true do |t|
-    t.integer  "s_configureable_id"
-    t.string   "s_configureable_type"
+    t.integer  "driver_id"
     t.integer  "serial_boud_rate"
     t.integer  "serial_data_length"
     t.integer  "serial_parity_check"

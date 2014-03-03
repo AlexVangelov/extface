@@ -12,7 +12,7 @@ module Extface
     def options_for_drivers
       Extface::Engine.eager_load!
       {}.tap do |drivers|
-        Extface::DriverBase.subclasses.collect{ |type|
+        Extface::Driver.subclasses.collect{ |type|
           drivers[type::GROUP] = subdrivers(Array.new, type)
         }
       end

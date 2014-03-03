@@ -26,7 +26,7 @@
       <tr>
         <td><%= link_to device.name, device %></td>
         <td><%= device.extfaceable.composite_id %></td>
-        <td><%= device.driveable ? device.driveable.class::NAME : 'N/A' %></td>
+        <td><%= device.driver ? device.driver.class::NAME : 'N/A' %></td>
         <td class='text-right'><%= link_to 'Edit', edit_device_path(device), class: 'btn btn-primary btn-sm' %></td>
         <td class='text-right'><%= button_to 'Delete', device, method: :delete, class: 'btn btn-danger btn-sm', data: { confirm: 'Are you sure?' } %></td>
       </tr>

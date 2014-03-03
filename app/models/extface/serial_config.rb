@@ -5,6 +5,6 @@ module Extface
     PARITY_CHECKS = [0, 1, 2].freeze
     STOP_BITS = [1, 2].freeze
     HANDSHAKE = [0, 1, 2].freeze
-    belongs_to :s_configureable, polymorphic: true
+    belongs_to :driver, inverse_of: :serial_config
   end
 end
