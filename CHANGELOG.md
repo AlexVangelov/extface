@@ -1,3 +1,6 @@
+## 0.1.2
+  - Fix invalid multibyte character
+
 ## 0.1.1
   - Remove rdoc, rails 4.0.3 dependancy
 
