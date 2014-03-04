@@ -53,7 +53,7 @@ Output can be forwarded to real device by adding ` > /dev/ttyS0` at the end exam
     end
 
 The result of this block returns immediately, and the job is executed in background.
-Job execution can be monitored with EventStream (SSE) at `extface.job_url(job)`
+Job execution can be monitored with EventStream (SSE) at `shop_extface_job_path(shop, job)`
 
 Extface is happy with Unicorn workers, even recommended it!
 

@@ -9,6 +9,8 @@ module Extface
       @job = Job.find(params[:id])
       if @job.completed?
         response.stream.write("data: Job #{@job.id} completed!\n\n")
+      elsif @job.failed?
+        response.stream.write("data: Job #{@job.id} failed!\n\n")
       else
         #redis = Redis.new
         response.stream.write("data: Job #{@job.id} waiting for device connection...\n\n")

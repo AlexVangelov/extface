@@ -1,3 +1,6 @@
+## 0.1.4
+  - added route helpers for device pull url and job path: `<model>_extface_device_pull_url`, `<model>_extface_job_path`
+
 ## 0.1.3
   - Created demo application at OpenShift
   - Fix invalid multibyte character
