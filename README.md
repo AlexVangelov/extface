@@ -20,7 +20,10 @@ Extface allows multiple jobs to be executed in queue, and privides job progress 
 Communication with devices is realized through Redis server, so it is required. Read more down.
 
 Home page: [http://extface.com](http://extface.com)
-Demo application: [http://scaled-extface.rhcloud.com](http://scaled-extface.rhcloud.com)
+
+Demo application: [http://example-extface.rhcloud.com](http://example-extface.rhcloud.com)
+
+Demo application source code: [https://github.com/AlexVangelov/extface-example](https://github.com/AlexVangelov/extface-example)
     
 To add external interfaces to `Shop` model, use mapper `extface_for` in `config/routes.rb`, example:
 
