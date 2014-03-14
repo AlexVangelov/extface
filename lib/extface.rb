@@ -2,7 +2,6 @@ require "extface/engine"
 require "extface/routes"
 require "extface/mapping"
 require "extface/extfaceable"
-require "extface/extfaceable"
 require "redis-namespace"
 module Extface
   RAW_DRIVER = "Raw Communication Devices"
