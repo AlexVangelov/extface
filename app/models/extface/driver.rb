@@ -33,30 +33,30 @@ module Extface
       end
     end
     
-    def handle(buffer) # handle push messages from device outside active session
-      return false
+    # called on every push message received, buffer contains all not processed data
+    def handle(buffer)
+      $stdout.puts "Extface:#{device.uuid} PUSH #{buffer}"
+      return buffer.length # return number of bytes processed
     end
     
     def push(buffer)
-      
-        if @job
-          Timeout.timeout(Extface.device_timeout) do
-            Extface.redis_block do |r|
-              r.subscribe(@job.id) do |on| #blocking until delivered
-                on.subscribe do |channel, subscriptions|
-                  @job.rpush buffer
-                end
-                on.message do |event, data|
-                  r.unsubscribe
-                  @job.connected!
-                end
+      if @job
+        Timeout.timeout(Extface.device_timeout) do
+          Extface.redis_block do |r|
+            r.subscribe(@job.id) do |on| #blocking until delivered
+              on.subscribe do |channel, subscriptions|
+                @job.rpush buffer
+              end
+              on.message do |event, data|
+                r.unsubscribe
+                @job.connected!
               end
             end
           end
-        else
-          raise "No job given"
         end
-      
+      else
+        raise "No job given"
+      end
     end
     
     def pull(timeout = nil)

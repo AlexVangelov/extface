@@ -43,18 +43,25 @@ module Extface
     def push
       # get  request.body.read
       # if it is push message, process it
-      response.headers['Content-Type'] = 'text/event-stream'
-      p request.body.read
-      Extface.redis.subscribe(:alabala) do |on|
-        on.message do |event, data|
-          response.stream.write("event: #{event} data: #{data}\n\n")
-          Extface.redis.unsubscribe
+      status = :not_implemented
+      unless device.present?
+        status = :not_found
+      else
+        Extface.redis_block do |r|
+          r.append device.uuid, request.body.read
+          @full_buffer = r.get device.uuid
         end
+        if bytes_porcessed = device.driver.handle(@full_buffer)
+          Extface.redis_block do |r|
+            r.set device.uuid, r.get(device.uuid)[bytes_porcessed]
+          end
+        end
+        status = :ok
       end
-      response.stream.write "finish\n"
-    ensure
-      response.stream.write "failed\n"
-      response.stream.close
+      render nothing: true, status: status
+    rescue => e
+      p e.message
+      render nothing: true, status: :internal_server_error
     end
     
     def settings

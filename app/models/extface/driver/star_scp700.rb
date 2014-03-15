@@ -10,10 +10,6 @@ module Extface
     PRINT = true #POS, slip printers
     FISCAL = false #cash registers, fiscal printers
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices    
-    
-    def autocut(partial = true)
-      print "\r\n\r\n\r\n"
-      print partial ? "\x1B\x64\x31" : "\x1B\x64\x30"
-    end
+
   end
 end

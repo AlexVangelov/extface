@@ -65,9 +65,19 @@
 </dl>
 
 <hr />
+
 <% if @device.print? %>
   <%= button_to 'Print Test Page', test_page_device_path(@device), remote: true, name: :test_page, value: true, class: 'btn btn-warning' %>
 <% end %>
+
+<br />Simulate push data from device
+
+    <div class="input-group">
+      <input type="text" id='data' class="form-control">
+      <span class="input-group-btn">
+        <%= link_to 'Push', extface.push_url(@device.uuid), id: :push, class: 'btn btn-warning'%>
+      </span>
+    </div><!-- /input-group -->
 
 <h1>Jobs</h1>
 <table class='table'>
