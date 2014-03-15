@@ -13,6 +13,12 @@ module Extface
 
     has_serial_config
     
+    def handle(buffer)
+      #expecting only 1 status byte, move it to receive_buffer
+      rpush buffer
+      return buffer.length # return number of bytes processed
+    end
+    
     def autocut(partial = true)
       # <ESC> “d” “0” - Full-cut command
       # <ESC> “d” “1” - Partial-cut command
@@ -20,18 +26,25 @@ module Extface
       push partial ? "\x1B\x64\x31" : "\x1B\x64\x30"
     end
     
-    def status_request
+    def check_status
+      flush
       push "\x05" # <ENQ>   - Causes the printer to transmit a status byte
+      if status = pull(3) #wait 3 sec for data
+        human_status_errors(status)
+        return errors.empty?
+      else
+        errors.add :base, "No data received from device"
+        return false
+      end
     end
     
     def human_status_errors(status_byte)
-      [].tap do |errors|
-        errors << "Vertical parity error" if status_byte & 0x01
-        errors << "Framing error" if status_byte & 0x02
-        errors << "Mechanical error" if status_byte & 0x04
-        errors << "Receipt paper empty" if status_byte & 0x08
-        errors << "Buffer overflow" if status_byte & 0x40
-      end
+      errors.add :base, "Vertical parity error" unless (status_byte.ord & 0x01).zero?
+      errors.add :base, "Framing error" unless (status_byte.ord & 0x02).zero?
+      errors.add :base, "Mechanical error" unless (status_byte.ord & 0x04).zero?
+      errors.add :base, "Receipt paper empty" unless (status_byte.ord & 0x08).zero?
+      errors.add :base, "Buffer overflow" unless (status_byte.ord & 0x40).zero?
     end
+
   end
 end

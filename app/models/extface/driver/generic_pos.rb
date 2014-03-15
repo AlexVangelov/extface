@@ -45,5 +45,9 @@ module Extface
       end
     end
     
+    def check_status
+      return true #just pass
+    end
+    
   end
 end

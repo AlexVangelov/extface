@@ -60,10 +60,24 @@ module Extface
     end
     
     def pull(timeout = nil)
+      element = nil
       Extface.redis_block do |r|
-        list, element = r.blpop(device.uuid, :timeout => timeout)
+        list, element = r.blpop(buffer_key, :timeout => timeout)
       end
       element
+    end
+    
+    def flush
+      Extface.redis_block do |r| 
+        r.del device.uuid
+        r.del buffer_key
+      end
+    end
+    
+    def rpush(buffer)
+      Extface.redis_block do |r|
+        r.rpush buffer_key, buffer
+      end
     end
     
     def notify(message)
@@ -73,7 +87,17 @@ module Extface
     
     def set_job(job)
       @job = job
+      return check_status
+    end
+    
+    def check_status
+      errors.add :base, :not_implemented
+      false
     end
 
+    private
+      def buffer_key
+        "#{device.uuid}:#{self.id}"
+      end
   end
 end

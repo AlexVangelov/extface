@@ -36,9 +36,12 @@ module Extface
       Thread.new do
         begin
           raise 'No driver configured' unless driver.present?
-          driver.set_job(job)
-          yield driver
-          job.complete!
+          if driver.set_job(job)
+            yield driver
+            job.complete!
+          else
+            raise driver.errors.full_messages.join(', ')
+          end
         rescue => e
           STDERR.puts e.message
           e.backtrace.each do |line|
