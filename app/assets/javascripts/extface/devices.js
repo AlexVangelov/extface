@@ -2,7 +2,12 @@
 // All this logic will automatically be available in application.js.
 $(document).ready(function()  {
   $('#push').click(function(e) {
-    $.post($(this).attr('href'), $('#data').val());
+    $.ajax({
+      type: "POST",
+      url: $(this).attr('href'),
+      data: $('#data').val(),
+      contentType: "application/octet-stream"
+    });
     e.preventDefault();
   });
 });

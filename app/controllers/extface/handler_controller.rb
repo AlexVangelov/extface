@@ -13,25 +13,7 @@ module Extface
       unless device.present?
         render nothing: true, status: :not_found
       else
-        response.headers['Content-Type'] = 'text/event-stream'
-        # find current job or get new one
-        Extface.redis_block do |r|
-            start = Time.now
-            if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
-              cookies.permanent[:extface] = job.id
-              p "Processing job #{job.id}"
-              list, data = r.blpop(job.id, timeout: 1)
-              while data
-                response.stream.write data
-                r.publish(job.id, "OK")
-                if (Time.now - start) > 3.seconds
-                  p "Will continue next time"
-                  #break
-                end
-                list, data = r.blpop(job.id, timeout: 1)
-              end
-            end
-        end #redis block
+        stream_job
       end
     rescue => e
       p e.message
@@ -56,12 +38,14 @@ module Extface
             r.set device.uuid, r.get(device.uuid)[bytes_porcessed]
           end
         end
+        stream_job # stream right now :)
         status = :ok
       end
-      render nothing: true, status: status
     rescue => e
       p e.message
       render nothing: true, status: :internal_server_error
+    ensure
+      response.stream.close
     end
     
     def settings
@@ -75,6 +59,28 @@ module Extface
       
       def require_device
         render status: :not_found if device.nil?
+      end
+      
+      def stream_job
+        response.headers['Content-Type'] = 'text/event-stream'
+        # find current job or get new one
+        Extface.redis_block do |r|
+            start = Time.now
+            if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
+              cookies.permanent[:extface] = job.id
+              p "Processing job #{job.id}"
+              list, data = r.blpop(job.id, timeout: 1)
+              while data
+                response.stream.write data
+                r.publish(job.id, "OK")
+                if (Time.now - start) > 3.seconds
+                  p "Will continue next time"
+                  #break
+                end
+                list, data = r.blpop(job.id, timeout: 1)
+              end
+            end
+        end #redis block
       end
   end
 end
