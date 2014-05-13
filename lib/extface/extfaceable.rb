@@ -3,7 +3,7 @@ module Extface
     extend ActiveSupport::Concern
     
     def composite_id
-      "#{self.class.name}##{self.id}"
+      "#{(self.class.try(:base_class) || self.class).send(:name)}##{self.id}"
     end
     
     module ClassMethods
