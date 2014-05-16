@@ -1,5 +1,14 @@
 module Extface
   module Driver::Daisy::CommandsFx1200
+  
+    STX = 0x01
+    PA1 = 0x05
+    PA2 = 0x04
+    ETX = 0x03
+    
+    NAK = 0x15
+    SYN = 0x16
+    
     module Init
       DATE_TIME           = 0x3d
       PRINT_OPTIONS       = 0x2b
@@ -81,8 +90,8 @@ module Extface
     end
     
     module Printer
-      CUT   = 0x2c
-      MOVE  = 0x2d
+      MOVE   = 0x2c
+      CUT  = 0x2d
     end
     
     module Other

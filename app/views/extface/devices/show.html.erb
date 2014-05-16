@@ -69,6 +69,9 @@
 <% if @device.print? %>
   <%= button_to 'Print Test Page', test_page_device_path(@device), remote: true, name: :test_page, value: true, class: 'btn btn-warning' %>
 <% end %>
+<% if @device.fiscal? %>
+  <%= button_to 'Print Status', print_status_device_path(@device), remote: true, name: :print_status, value: true, class: 'btn btn-warning' %>
+<% end %>
 
 <br />Simulate push data from device
 

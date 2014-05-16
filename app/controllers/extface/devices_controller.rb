@@ -54,6 +54,12 @@ module Extface
       @job = @device.driver.print_test_page if params[:test_page]
       render action: :show
     end
+    
+    def print_status
+      set_device
+      @job = @device.driver.print_status if params[:print_status]
+      render action: :show
+    end
 
     private
       # Use callbacks to share common setup or constraints between actions.
