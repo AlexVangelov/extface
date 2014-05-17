@@ -55,9 +55,17 @@ module Extface
       render action: :show
     end
     
-    def print_status
+    def fiscal
       set_device
-      @job = @device.driver.print_status if params[:print_status]
+      if @device.fiscal?
+        @job = case
+          when params[:non_fiscal_test].present? then @device.driver.non_fiscal_test
+          when params[:fiscal_test].present? then @device.driver.fiscal_test
+          when params[:x_report].present? then @device.driver.x_report_session
+          when params[:z_report].present? then @device.driver.z_report_session
+          when params[:cancel_fiscal_doc].present? then @device.driver.cancel_doc_session
+        end
+      end
       render action: :show
     end
 

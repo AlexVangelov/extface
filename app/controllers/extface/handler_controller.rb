@@ -33,7 +33,7 @@ module Extface
           r.append device.uuid, request.body.read
           @full_buffer = r.get device.uuid
         end
-        if bytes_porcessed = device.driver.handle(@full_buffer)
+        if bytes_porcessed = device.driver.handle(@full_buffer.b)
           Extface.redis_block do |r|
             r.set device.uuid, r.get(device.uuid)[bytes_porcessed]
           end

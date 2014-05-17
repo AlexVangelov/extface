@@ -24,20 +24,36 @@ module Extface
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices  
     
     RESPONSE_TIMEOUT = 6  #seconds
+    INVALID_FRAME_RETRIES = 6  #seconds
+    
+    TAX_GROUPS_MAP = {
+      1 => "\xc0",
+      2 => "\xc1",
+      3 => "\xc2",
+      4 => "\xc3",
+      5 => "\xc4",
+      6 => "\xc5",
+      7 => "\xc6",
+      8 => "\xc7"
+    }
     
     has_serial_config
     
     include Extface::Driver::Daisy::CommandsFx1200
 
     def handle(buffer) #buffer is filled with multiple pushes, wait for full frame (ACKs)STX..PA2..PA1..ETX
-      p "###################"
-      p buffer.bytes
-      if frame_len = buffer.index(ETX) || buffer.index(NAK)
-        rpush buffer[0..packet_len]
+      if buffer[/^\x16+$/] # skip if only ACKs
+        return buffer.length 
       else
-        #TODO check buffer.length
+        if frame_len = buffer.index("\x03") || buffer.index("\x15")
+          rpush buffer[0..frame_len]
+          return frame_len+1 # return number of bytes processed
+        else
+          #TODO check buffer.length
+          return 0 #no bytes processed
+        end
       end
-      return frame_len # return number of bytes processed
+      return buffer.length 
     end
     
     def autocut(partial = true) # return "P" - success, "F" - failed
@@ -45,9 +61,9 @@ module Extface
       resp == "P"
     end
      
-    def print_status
-      device.session("Print Status") do |s|
-        s.notify "Printing Test Page"
+    def non_fiscal_test
+      device.session("Non Fiscal Text") do |s|
+        s.notify "Printing Non Fiscal Text"
         s.fsend Sales::START_NON_FISCAL_DOC
         s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
         s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Extface Print Test".center(32)
@@ -56,7 +72,62 @@ module Extface
         s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Driver: " + "#{self.class::NAME}".truncate(24)
         s.fsend(Sales::END_NON_FISCAL_DOC)
         s.notify "Printing finished"
-        s.autocut
+      end
+    end
+    
+    def fiscal_test
+      sale_and_pay_items_session([
+        { price: 0.01, text1: "Extface Test" }
+      ])
+    end
+    
+    def build_sale_data(price, text1 = nil, text2 = nil, tax_group = 2, qty = nil, percent = nil, neto = nil)
+      "".tap() do |data|
+        data << text1 unless text1.blank?
+        data << "\x0a#{text2}" unless text2.blank?
+        data << "\t"
+        data << TAX_GROUPS_MAP[tax_group || 2]
+        data << price.to_s
+        data << "*#{qty.to_s}" unless qty.blank?
+        data << ",#{percent}" unless percent.blank?
+        data << "$#{neto}" unless neto.blank?
+      end
+    end
+    
+    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
+      device.session("Fiscal Doc") do |s|
+        s.notify "Fiscal Doc Start"
+        s.fsend Sales::START_FISCAL_DOC, "#{operator},#{password},00001"
+        items.each do |item|
+          s.fsend Sales::SALE_AND_SHOW, build_sale_data(item[:price], item[:text1], item[:text2], item[:tax_group], item[:qty], item[:percent], item[:neto])
+        end
+        s.fsend(Sales::TOTAL, "\t")
+        s.fsend(Sales::END_FISCAL_DOC)
+        s.notify "Fiscal Doc End"
+      end
+    end
+    
+    def z_report_session
+      device.session("Z Report") do |s|
+        s.notify "Z Report Start"
+        s.fsend Closure::DAY_FIN_REPORT, "0"
+        s.notify "Z Report End"
+      end
+    end
+    
+    def x_report_session
+      device.session("X Report") do |s|
+        s.notify "X Report Start"
+        s.fsend Closure::DAY_FIN_REPORT, "2"
+        s.notify "X Report End"
+      end
+    end
+    
+    def cancel_doc_session
+      device.session("Doc cancel") do |s|
+        s.notify "Doc Cancel Start"
+        s.fsend Sales::CANCEL_DOC
+        s.notify "Doc Cancel End"
       end
     end
     
@@ -81,7 +152,7 @@ module Extface
     
     def fsend!(cmd, data = "") # return data or raise
       push build_packet(cmd, data) # return 6 byte status
-      if resp = recv(RESPONSE_TIMEOUT)
+      if resp = frecv(RESPONSE_TIMEOUT)
         return resp.data if resp.valid?
       else
         raise errors.full_messages.join(', ')
@@ -89,24 +160,25 @@ module Extface
     end
     
     def fsend(cmd, data = "") #return data or nil
-      push build_packet(cmd, data)
-      if resp = frecv(RESPONSE_TIMEOUT)
-        return resp.data if resp.valid?
-      else
-        return false
+      packet_data = build_packet(cmd, data)
+      result = false
+      INVALID_FRAME_RETRIES.times do |retries|
+        errors.clear
+        push packet_data
+        if resp = frecv(RESPONSE_TIMEOUT)
+          if resp.valid?
+            result = resp.data
+            break
+          end
+        end
+        errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
       end
+      return result
     end
     
     def frecv(timeout) # return RespFrame or nil
       if frame_bytes = pull(timeout)
-        frame = RespFrame.new(frame_bytes)
-        if frame.valid?
-          human_status_errors(frame.status)
-          return frame
-        else
-          errors.add :base, "Invalid frame received from device"
-          return nil
-        end
+        return RespFrame.new(frame_bytes.b)
       else
         errors.add :base, "No data received from device"
         return nil
@@ -192,13 +264,13 @@ module Extface
         attr_reader :frame, :len, :seq, :cmd, :data, :status, :bcc
         
         validates_presence_of :frame
-        validate :bcc_validation
-        validate :len_validation
+        #validate :bcc_validation
+        #validate :len_validation
         
         def initialize(buffer)
           # test Extface::Driver::DaisyFx1200::RespFrame.new("\x16\x16\x01\x2c\x20\x2dP\x04SSSSSS\x05\BBBB\x03")
           #                              LEN   SEQ   CMD DATA    STATUS      BCC
-          if match = buffer.match(/\x01(.{1})(.{1})(.{1})(.+)\x04(.{6})\x05(.{4})\x03/n)
+          if match = buffer.match(/\x01(.{1})(.{1})(.{1})(.*)\x04(.{6})\x05(.{4})\x03/n)
             @frame = match.string[match.pre_match.length..-1]
             @len, @seq, @cmd, @data, @status, @bcc = match.captures
           end
@@ -210,7 +282,12 @@ module Extface
             frame[1..-6].each_byte do |byte|
               sum += byte
             end
-            errors.add(:bcc, I18n.t('errors.messages.invalid')) if bcc != sum.to_s(16).rjust(4, '0')
+            calc_bcc = "".tap() do |tbcc|
+              4.times do |halfbyte|
+                tbcc.insert 0, (0x30 + ((sum >> (halfbyte*4)) & 0x0f)).chr
+              end
+            end
+            errors.add(:bcc, I18n.t('errors.messages.invalid')) if bcc != calc_bcc
           end
           
           def len_validation
