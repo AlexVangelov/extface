@@ -42,6 +42,16 @@ module Extface
       OPEN_DRAWER_1   = 0x7b
       OPEN_DRAWER_2   = 0x7c
     end
+    
+    def handle(buffer)
+      bytes_processed = 0
+      if frame_match = buffer.match(/\x02.*\x03.{4}/n)
+        frame_data = frame_match.to_s
+        rpush frame_data
+        bytes_processed = frame_match.pre_match.length + frame_data.length
+      end
+      return bytes_processed
+    end
 
     def build_packet(cmd, fields = [])
       String.new.tap() do |frame|
@@ -71,6 +81,19 @@ module Extface
         @seq += 1 if increment
         @seq = 0x20 if @seq == 0x7f
         @seq
-      end 
+      end
+      
+      class Frame
+        include ActiveModel::Validations
+        attr_reader :frame, :seq, :cmd, :fields_data, :fields, :bcc
+
+        def initialize(buffer)
+          if match = buffer.match(/\x02([\x20-\x7F])([\x30-\xaf])\x1c(.*)\x03(.{4})/n)
+            @frame = match.to_a.first
+            @seq, @cmd, @fileds_data, @bcc = match.captures
+            @fields = @fields_data.split("\x1c")
+          end
+        end
+      end
   end
 end

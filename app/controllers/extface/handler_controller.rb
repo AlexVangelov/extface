@@ -21,7 +21,7 @@ module Extface
     ensure
       response.stream.close
     end
-    
+
     def push
       # get  request.body.read
       # if it is push message, process it
@@ -35,10 +35,10 @@ module Extface
         end
         if bytes_porcessed = device.driver.handle(@full_buffer.b)
           Extface.redis_block do |r|
-            r.set device.uuid, r.get(device.uuid)[bytes_porcessed]
+            r.set device.uuid, @full_buffer.b[bytes_porcessed..-1]
           end
         end
-        stream_job # stream right now :)
+        #stream_job # stream right now :)
         status = :ok
       end
     rescue => e

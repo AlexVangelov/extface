@@ -23,7 +23,7 @@ module Extface
     FISCAL = true #cash registers, fiscal printers
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices  
     
-    RESPONSE_TIMEOUT = 6  #seconds
+    RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #seconds
     
     TAX_GROUPS_MAP = {
@@ -53,7 +53,6 @@ module Extface
           return 0 #no bytes processed
         end
       end
-      return buffer.length 
     end
     
     def autocut(partial = true) # return "P" - success, "F" - failed
@@ -70,7 +69,7 @@ module Extface
         s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
         s.fsend Printer::MOVE, "1"
         s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Driver: " + "#{self.class::NAME}".truncate(24)
-        s.fsend(Sales::END_NON_FISCAL_DOC)
+        s.fsend Sales::END_NON_FISCAL_DOC
         s.notify "Printing finished"
       end
     end
@@ -97,7 +96,7 @@ module Extface
     def sale_and_pay_items_session(items = [], operator = "1", password = "1")
       device.session("Fiscal Doc") do |s|
         s.notify "Fiscal Doc Start"
-        s.fsend Sales::START_FISCAL_DOC, "#{operator},#{password},00001"
+        s.fsend Sales::START_FISCAL_DOC, "#{operator || "1"},#{password || "1"},00001"
         items.each do |item|
           s.fsend Sales::SALE_AND_SHOW, build_sale_data(item[:price], item[:text1], item[:text2], item[:tax_group], item[:qty], item[:percent], item[:neto])
         end
@@ -185,7 +184,7 @@ module Extface
       end
     end
    
-    #private 
+    private 
       def bcc(buffer)
         sum = 0
         buffer.each_byte do |byte|
@@ -264,15 +263,17 @@ module Extface
         attr_reader :frame, :len, :seq, :cmd, :data, :status, :bcc
         
         validates_presence_of :frame
-        #validate :bcc_validation
-        #validate :len_validation
+        validate :bcc_validation
+        validate :len_validation
         
         def initialize(buffer)
           # test Extface::Driver::DaisyFx1200::RespFrame.new("\x16\x16\x01\x2c\x20\x2dP\x04SSSSSS\x05\BBBB\x03")
           #                              LEN   SEQ   CMD DATA    STATUS      BCC
           if match = buffer.match(/\x01(.{1})(.{1})(.{1})(.*)\x04(.{6})\x05(.{4})\x03/n)
-            @frame = match.string[match.pre_match.length..-1]
+            @frame = match.to_a.first
             @len, @seq, @cmd, @data, @status, @bcc = match.captures
+          else
+            #TODO look for NAK
           end
         end
         
