@@ -39,15 +39,23 @@ module Extface
     def non_fiscal_test
       device.session("Non Fiscal Text") do |s|
         s.notify "Printing Non Fiscal Text"
-        #s.fsend Sales::START_NON_FISCAL_DOC
-        #s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
-        #s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Extface Print Test".center(32)
-        #s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
-        #s.fsend Printer::MOVE, "1"
-        #s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Driver: " + "#{self.class::NAME}".truncate(24)
-        #s.fsend Sales::END_NON_FISCAL_DOC
+        s.fsend Receipt::OPEN_RECEIPT
+        status = s.printer_status!
+        s.fsend Receipt::PRINT_RECEIPT, "\x01" << "********************************"
+        status = s.printer_status!
+        s.fsend Receipt::CLOSE_RECEIPT
+        status = s.printer_status!
         s.notify "Printing finished"
       end
+    end
+    
+    
+    def printer_status!
+      fsent Info::GET_STATUS
+      raise errors.full_messages.join(", ") if errors.any?
+      status = PrinterStatus.new(fsent(Info::GET_PRINTER_STATUS))
+      raise errors.full_messages.join(", ") if errors.any?
+      status
     end
     
     def check_status
@@ -149,6 +157,23 @@ module Extface
           
           def response_code_validation
             case cmd.ord
+            when 0x2c then
+              case data[0] # printer error code
+              when 1 then errors.add :base, "Opening of the cash register document is not requested"
+              when 2 then errors.add :base, "Transaction code recognized (refer to command 0x2E)"
+              when 3 then errors.add :base, "Transaction buffer overflow"
+              when 4 then errors.add :base, "Transaction sequence error"
+              when 5 then errors.add :base, "Multiplication overflow"
+              when 6 then errors.add :base, "Cash register document overflow"
+              when 7 then errors.add :base, "'0' length of code name"
+              when 8 then errors.add :base, "Negative result"
+              when 9 then errors.add :base, "Cash register document surcharge"
+              when 10 then errors.add :base, "Out of range parameter"
+              when 11 then errors.add :base, "Cash register document not paid"
+              when 12 then errors.add :base, "'0' result"
+              when 13 then errors.add :base, "Memory overflow because of too many PLUs"
+              when 14 then errors.add :base, "Daily report overflow"
+              end
             when 0x6F then
               case data[1]
               when 1 then errors.add :base, "End of paper"
@@ -185,6 +210,44 @@ module Extface
             when 0x7F then errors.add :base, "Wrong command"
             end
           end
+      end
+      
+      class PrinterStatus
+        def start_bon_flag?
+        end
+
+        def end_bon_flag?
+        end
+
+        def last_transaction
+        end
+
+        def transaction_count
+        end
+
+        def last_transaction_sum
+        end
+
+        def all_transaction_sum
+        end
+
+        def total_sum
+        end
+
+        def stl_discount_flag?
+        end
+
+        def last_recept_number
+        end
+
+        def last_invoice_number
+        end
+
+        def available_invoice_numbers
+        end
+
+        def plu_count_in_memory
+        end
       end
   end
 end

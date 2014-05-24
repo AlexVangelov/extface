@@ -23,7 +23,7 @@ module Extface
     end
     module Receipt
       OPEN_RECEIPT          = 0x2D
-      START_RECEIPT         = 0x2E
+      PRINT_RECEIPT         = 0x2E
       CLOSE_RECEIPT         = 0x2F
       LAST_DOC_COPY         = 0x31
       SET_INVOICE_NUMBER    = 0x34
