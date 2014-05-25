@@ -1,3 +1,7 @@
+## 0.2.0
+   - Driver clarify responce from device
+   - Added experimental Eltrade TM U220 fiscal support
+
 ## 0.1.4
   - added route helpers for device pull url and job path: `<model>_extface_device_pull_url`, `<model>_extface_job_path`
 

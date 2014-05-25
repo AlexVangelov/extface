@@ -30,13 +30,11 @@ module Extface
     def handle(buffer)
       bytes_processed = 0
       if frame_match = buffer.match(/\xAA\x55.{3}(.{1}).*/nm) #m Treat \x0a as a character matched by .
-      p frame_match.to_a.first.bytes.collect{ |x| x.to_s(16)}
         len = frame_match.captures.first.ord
         skip = frame_match.pre_match.length
         bytes_processed = skip + 7 + len # 6 pre + 1 check sum
         rpush buffer[skip..bytes_processed]
       end
-      p "processed: #{bytes_processed}"
       return bytes_processed
     end
     
