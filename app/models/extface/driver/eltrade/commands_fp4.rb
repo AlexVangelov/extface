@@ -24,6 +24,12 @@ module Extface
     module Receipt
       OPEN_RECEIPT          = 0x2D
       PRINT_RECEIPT         = 0x2E
+        module Variant
+          COMMENT               = "\x01"
+          PLU                   = "\x02"
+          START_INVOICE_RECEIPT = "\x0D"
+          START_COMMENT_RECEIPT = "\x0F"
+        end
       CLOSE_RECEIPT         = 0x2F
       LAST_DOC_COPY         = 0x31
       SET_INVOICE_NUMBER    = 0x34

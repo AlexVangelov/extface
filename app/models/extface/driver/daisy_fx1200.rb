@@ -269,7 +269,7 @@ module Extface
         def initialize(buffer)
           # test Extface::Driver::DaisyFx1200::RespFrame.new("\x16\x16\x01\x2c\x20\x2dP\x04SSSSSS\x05\BBBB\x03")
           #                              LEN   SEQ   CMD DATA    STATUS      BCC
-          if match = buffer.match(/\x01(.{1})(.{1})(.{1})(.*)\x04(.{6})\x05(.{4})\x03/n)
+          if match = buffer.match(/\x01(.{1})(.{1})(.{1})(.*)\x04(.{6})\x05(.{4})\x03/nm)
             @frame = match.to_a.first
             @len, @seq, @cmd, @data, @status, @bcc = match.captures
           else

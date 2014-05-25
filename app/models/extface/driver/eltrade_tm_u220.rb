@@ -20,40 +20,144 @@ module Extface
     RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #seconds   
     
+    FLAG_TRUE = "\xff\xff"
+    FLAG_FALSE = "\x00\x00"
+    
     has_serial_config
     
     include Extface::Driver::Eltrade::CommandsFp4
     
     def handle(buffer)
       bytes_processed = 0
-      if frame_match = buffer.match(/\xAA\x55.{3}(.{1}).*/n)
+      if frame_match = buffer.match(/\xAA\x55.{3}(.{1}).*/nm) #m Treat \x0a as a character matched by .
       p frame_match.to_a.first.bytes.collect{ |x| x.to_s(16)}
         len = frame_match.captures.first.ord
         skip = frame_match.pre_match.length
-        bytes_processed = skip + 6 + len
+        bytes_processed = skip + 7 + len # 6 pre + 1 check sum
         rpush buffer[skip..bytes_processed]
       end
+      p "processed: #{bytes_processed}"
       return bytes_processed
+    end
+    
+    def open_receipt(variant = nil)
+      fsend Receipt::OPEN_RECEIPT
+      status = printer_status!
+      unless variant.blank?
+        fsend Receipt::PRINT_RECEIPT, variant
+        status = printer_status!
+      end
+    end
+    
+    def close_receipt
+      fsend Receipt::CLOSE_RECEIPT
+      status = printer_status!
+    end
+    
+    def send_comment(text)
+      fsend Receipt::PRINT_RECEIPT, Receipt::Variant::COMMENT + text
+      status = printer_status!
+    end
+    
+    def send_plu(plu_data)
+      fsend Receipt::PRINT_RECEIPT, Receipt::Variant::PLU + plu_data
+      status = printer_status!
+    end
+    
+    def send_payment(type_num = 0, value = nil) # 0, 1, 2, 3
+      value_bytes = "\x00\x00\x00\x00" # recalculate
+      unless value.nil?
+        value_units = (value * 100).to_i # !FIXME
+        value_bytes = "".b
+        4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
+      end
+      fsend Receipt::PRINT_RECEIPT, "" << (9 + type_num).chr << value_bytes
     end
     
     def non_fiscal_test
       device.session("Non Fiscal Text") do |s|
         s.notify "Printing Non Fiscal Text"
-        s.fsend Receipt::OPEN_RECEIPT
-        status = s.printer_status!
-        s.fsend Receipt::PRINT_RECEIPT, "\x01" << "********************************"
-        status = s.printer_status!
-        s.fsend Receipt::CLOSE_RECEIPT
-        status = s.printer_status!
+        s.open_receipt Receipt::Variant::START_COMMENT_RECEIPT
+        s.send_comment "********************************"
+        s.send_comment "Extface Print Test".center(32)
+        s.send_comment "********************************"
+        s.send_comment ""
+        s.send_comment "Driver: " + "#{self.class::NAME}".truncate(24)
+        s.close_receipt
         s.notify "Printing finished"
+      end
+    end
+    
+    def fiscal_test
+      sale_and_pay_items_session([
+        { price: 0.01, text1: "Extface Test" }
+      ])
+    end
+    
+    def build_sale_data(price, text1 = "", text2 = nil, tax_group = 2, qty = 1, percent = nil, neto = nil, number = nil)
+      "".b.tap() do |data|
+        price_units = (price * 100).to_i # !FIXME
+        price_bytes = "".b
+        4.times{ |shift| price_bytes.insert 0, ((price_units >> shift*8) & 0xff).chr }
+        data << price_bytes
+        qty_units = ((qty || 1) * 1000).to_i # !FIXME
+        qty_bytes = "".b
+        4.times{ |shift| qty_bytes.insert 0, ((qty_units >> shift*8) & 0xff).chr }
+        data << qty_bytes
+        data << "\x00".b #number len FIXME
+        data << "\xAA\xAA\xAA\xAA\xAA\xAA".b #number FIXME
+        text = text1.truncate(20)
+        data << text.length.chr
+        data << text.ljust(20, " ").b
+        data << (tax_group || 2).chr
+      end
+    end
+    
+    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
+      device.session("Fiscal Doc") do |s|
+        s.notify "Fiscal Doc Start"
+        s.open_receipt
+        items.each do |item|
+          s.send_plu build_sale_data(item[:price], item[:text1], nil, item[:tax_group], item[:qty], nil, nil, item[:number])
+          s.send_comment(item[:text2]) unless item[:text2].blank?
+        end
+        s.send_payment
+        s.close_receipt
+        s.notify "Fiscal Doc End"
+      end
+    end
+    
+    def z_report_session
+      device.session("Z Report") do |s|
+        s.notify "Z Report Start"
+        s.fsend Reports::DAILY_REPORT, FLAG_TRUE
+        status = s.printer_status!
+        s.notify "Z Report End"
+      end
+    end
+    
+    def x_report_session
+      device.session("Z Report") do |s|
+        s.notify "Z Report Start"
+        s.fsend Reports::DAILY_REPORT, FLAG_FALSE
+        status = s.printer_status!
+        s.notify "Z Report End"
+      end
+    end
+    
+    def cancel_doc_session
+      device.session("Doc cancel") do |s|
+        s.notify "Doc Cancel Start"
+        #s.fsend Sales::CANCEL_DOC
+        s.notify "Doc Cancel End"
       end
     end
     
     
     def printer_status!
-      fsent Info::GET_STATUS
+      fsend Info::GET_STATUS
       raise errors.full_messages.join(", ") if errors.any?
-      status = PrinterStatus.new(fsent(Info::GET_PRINTER_STATUS))
+      status = PrinterStatus.new(fsend(Info::GET_PRINTER_STATUS))
       raise errors.full_messages.join(", ") if errors.any?
       status
     end
@@ -132,7 +236,7 @@ module Extface
         validate :response_code_validation
         
         def initialize(buffer)
-          if match = buffer.match(/\xAA\x55(.{1})(.{1})(.{1})(.{1})(.*)(.{1})$/n)
+          if match = buffer.match(/\xAA\x55(.{1})(.{1})(.{1})(.{1})(.*)(.{1})$/nm)
             @frame = match.to_a.first
             @addr, @seq, @cmd, @len, @data, @check_sum = match.captures
           end
@@ -213,6 +317,10 @@ module Extface
       end
       
       class PrinterStatus
+      
+        def initialize(status)
+        end
+        
         def start_bon_flag?
         end
 
