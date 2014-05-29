@@ -1,3 +1,7 @@
+## 0.2.1
+   - Eltrade driver improve
+   - Burst transfer (server split requests, client reconnect immediately if not finished)
+
 ## 0.2.0
    - Driver clarify responce from device
    - Added experimental Eltrade TM U220 fiscal support
