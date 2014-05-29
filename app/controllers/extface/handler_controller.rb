@@ -73,9 +73,9 @@ module Extface
               while data
                 response.stream.write data
                 r.publish(job.id, "OK")
-                if (Time.now - start) > 3.seconds
-                  p "Will continue next time"
-                  #break
+                if (Time.now - start) > 1.8.seconds
+                  p "############ Will continue next time"
+                  break
                 end
                 list, data = r.blpop(job.id, timeout: 1)
               end
