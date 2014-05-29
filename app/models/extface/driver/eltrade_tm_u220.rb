@@ -18,7 +18,8 @@ module Extface
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices 
     
     RESPONSE_TIMEOUT = 3  #seconds
-    INVALID_FRAME_RETRIES = 6  #seconds   
+    INVALID_FRAME_RETRIES = 6  #count
+    BUSY_WAIT_CYCLES = 12  #count
     
     FLAG_TRUE = "\xff\xff"
     FLAG_FALSE = "\x00\x00"
@@ -33,33 +34,36 @@ module Extface
         len = frame_match.captures.first.ord
         skip = frame_match.pre_match.length
         bytes_processed = skip + 7 + len # 6 pre + 1 check sum
-        rpush buffer[skip..bytes_processed]
+        if bytes_processed <= buffer.length #packet in buffer
+          rpush buffer[skip..bytes_processed]
+        else
+          bytes_processed = skip #not whole packet, just remove trail
+        end
       end
       return bytes_processed
     end
     
     def open_receipt(variant = nil)
       fsend Receipt::OPEN_RECEIPT
-      status = printer_status!
       unless variant.blank?
         fsend Receipt::PRINT_RECEIPT, variant
-        status = printer_status!
       end
+      status = get_printer_status
     end
     
     def close_receipt
       fsend Receipt::CLOSE_RECEIPT
-      status = printer_status!
+      status = get_printer_status
     end
     
     def send_comment(text)
       fsend Receipt::PRINT_RECEIPT, Receipt::Variant::COMMENT + text
-      status = printer_status!
+      status = get_printer_status
     end
     
     def send_plu(plu_data)
       fsend Receipt::PRINT_RECEIPT, Receipt::Variant::PLU + plu_data
-      status = printer_status!
+      status = get_printer_status
     end
     
     def send_payment(type_num = 0, value = nil) # 0, 1, 2, 3
@@ -70,6 +74,7 @@ module Extface
         4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
       end
       fsend Receipt::PRINT_RECEIPT, "" << (9 + type_num).chr << value_bytes
+      status = get_printer_status
     end
     
     def non_fiscal_test
@@ -129,7 +134,7 @@ module Extface
       device.session("Z Report") do |s|
         s.notify "Z Report Start"
         s.fsend Reports::DAILY_REPORT, FLAG_TRUE
-        status = s.printer_status!
+        status = s.get_printer_status
         s.notify "Z Report End"
       end
     end
@@ -138,7 +143,7 @@ module Extface
       device.session("Z Report") do |s|
         s.notify "X Report Start"
         s.fsend Reports::DAILY_REPORT, FLAG_FALSE
-        status = s.printer_status!
+        status = s.get_printer_status
         s.notify "X Report End"
       end
     end
@@ -146,23 +151,28 @@ module Extface
     def cancel_doc_session
       device.session("Doc cancel") do |s|
         s.notify "Doc Cancel Start"
-        #s.fsend Sales::CANCEL_DOC
+        # cancel old one by open/close new one
+        s.open_receipt
+        s.close_receipt
         s.notify "Doc Cancel End"
       end
     end
     
-    
-    def printer_status!
+    def check_ready!
       fsend Info::GET_STATUS
       raise errors.full_messages.join(", ") if errors.any?
-      status = PrinterStatus.new(fsend(Info::GET_PRINTER_STATUS))
-      raise errors.full_messages.join(", ") if errors.any?
-      status
+    end
+    
+    def get_printer_status
+      PrinterStatus.new(fsend(Info::GET_PRINTER_STATUS))
     end
     
     def check_status
       flush
-      fsend(Info::GET_STATUS)
+      status = get_printer_status
+      #TODO check for:
+      #1. sold PLUs dangerously high -> solution PLU Report (0x32)
+      #2. open bon and transaction count
       errors.empty?
     end
     
@@ -181,6 +191,12 @@ module Extface
     def fsend(cmd, data = "") #return data or nil
       packet_data = build_packet(cmd, data)
       result = false
+      BUSY_WAIT_CYCLES.times do |retries|
+        push build_packet(Info::GET_STATUS)
+        if status = frecv(RESPONSE_TIMEOUT)
+          break if status.ready?
+        end
+      end
       INVALID_FRAME_RETRIES.times do |retries|
         errors.clear
         push packet_data
@@ -242,6 +258,10 @@ module Extface
         
         def ready?
           @ready || true
+        end
+        
+        def busy?
+          !ready?
         end
         
         private
@@ -317,42 +337,55 @@ module Extface
       class PrinterStatus
       
         def initialize(status)
+          @status = status
         end
         
         def start_bon_flag?
+          @status[2,2] == "\xff\xff"
         end
 
         def end_bon_flag?
+          @status[4,2] == "\xff\xff"
         end
 
         def last_transaction
+          @status[8,2]
         end
-
+        
         def transaction_count
+          @status[10,2]
         end
 
         def last_transaction_sum
+          @status[12,4]
         end
 
         def all_transaction_sum
+          @status[16,4]
         end
 
         def total_sum
+          @status[20,4]
         end
 
         def stl_discount_flag?
+          @status[24,2] == '\xff\xff'
         end
 
         def last_recept_number
+          @status[26,2]
         end
 
         def last_invoice_number
+          @status[34,2] + @status[28,4]
         end
 
         def available_invoice_numbers
+          @status[36,2]
         end
 
         def plu_count_in_memory
+          @status[32,2]
         end
       end
   end
