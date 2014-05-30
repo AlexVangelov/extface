@@ -1,3 +1,6 @@
+## 0.2.2
+   - Eltrade defer busy response
+
 ## 0.2.1
    - Eltrade driver improve
    - Burst transfer (server split requests, client reconnect immediately if not finished)
