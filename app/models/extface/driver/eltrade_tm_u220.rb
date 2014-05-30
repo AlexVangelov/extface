@@ -19,7 +19,7 @@ module Extface
     
     RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #count
-    BUSY_WAIT_CYCLES = 12  #count
+    BUSY_MAX_WAIT_CYCLES = 60  #count
     
     FLAG_TRUE = "\xff\xff"
     FLAG_FALSE = "\x00\x00"
@@ -189,14 +189,26 @@ module Extface
     end
     
     def fsend(cmd, data = "") #return data or nil
-      packet_data = build_packet(cmd, data)
       result = false
-      BUSY_WAIT_CYCLES.times do |retries|
+      status_invalid_responses = 0
+      BUSY_MAX_WAIT_CYCLES.times do |retries|
+        errors.clear
         push build_packet(Info::GET_STATUS)
-        if status = frecv(RESPONSE_TIMEOUT)
-          break if status.ready?
+        if stat_frame = frecv(RESPONSE_TIMEOUT)
+          if stat_frame.valid?
+            break if stat_frame.ready?
+          else
+            status_invalid_responses -= 1
+            unless status_invalid_responses < INVALID_FRAME_RETRIES
+              errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
+            end
+          end
         end
+        errors.add :base, "#{BUSY_MAX_WAIT_CYCLES} Busy Packets Received. Abort!"
       end
+      return(result) if errors.any?
+      
+      packet_data = build_packet(cmd, data)
       INVALID_FRAME_RETRIES.times do |retries|
         errors.clear
         push packet_data
@@ -278,6 +290,7 @@ module Extface
           end
           
           def response_code_validation
+            p "############################### #{cmd.ord.to_s(16)}"
             case cmd.ord
             when 0x2c then
               case data[0] # printer error code
