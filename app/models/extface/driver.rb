@@ -40,7 +40,7 @@ module Extface
     end
     
     def pre_handle(buffer)
-      logger.debug "<-- #{buffer.bytes.map{ |b| b.to_s(16) }.join(' ')}" if development?
+      logger.debug "<-- #{buffer.bytes.map{ |b| '%02X' % b }.join(' ')}" if development?
       handle(buffer)
     end
     
@@ -51,7 +51,7 @@ module Extface
             r.subscribe(@job.id) do |on| #blocking until delivered
               on.subscribe do |channel, subscriptions|
                 @job.rpush buffer
-                logger.debug "--> #{buffer.bytes.map{ |b| b.to_s(16) }.join(' ')}" if development?
+                logger.debug "--> #{buffer.bytes.map{ |b| '%02X' % b }.join(' ')}" if development?
               end
               on.message do |event, data|
                 r.unsubscribe
