@@ -39,6 +39,11 @@ module Extface
       return buffer.length # return number of bytes processed
     end
     
+    def pre_handle(buffer)
+      logger.debug "<-- #{buffer.bytes.map{ |b| b.to_s(16) }.join(' ')}" if development?
+      handle(buffer)
+    end
+    
     def push(buffer)
       if @job
         Timeout.timeout(Extface.device_timeout) do
@@ -46,6 +51,7 @@ module Extface
             r.subscribe(@job.id) do |on| #blocking until delivered
               on.subscribe do |channel, subscriptions|
                 @job.rpush buffer
+                logger.debug "--> #{buffer.bytes.map{ |b| b.to_s(16) }.join(' ')}" if development?
               end
               on.message do |event, data|
                 r.unsubscribe
@@ -98,6 +104,18 @@ module Extface
     private
       def buffer_key
         "#{device.uuid}:#{self.id}"
+      end
+      
+      def logger
+        @logger ||= begin
+          dir = "#{Rails.root}/log/extface/#{device.id}"
+          FileUtils.mkdir_p(dir) unless File.directory?(dir)
+          Logger.new("#{dir}/#{self.class.name.demodulize.underscore}.log", 'daily')
+        end
+      end
+      
+      def development?
+        self.class::DEVELOPMENT
       end
   end
 end
