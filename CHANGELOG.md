@@ -1,3 +1,6 @@
+## 0.2.3
+   - Driver IO data logger
+
 ## 0.2.2
    - Eltrade defer busy response
 

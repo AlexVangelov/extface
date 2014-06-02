@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.2.2)
+    extface (0.2.3)
       rails (>= 4.0.5)
       redis
       redis-namespace
@@ -44,7 +44,7 @@ GEM
     mime-types (1.25.1)
     minitest (4.7.5)
     multi_json (1.10.1)
-    polyglot (0.3.4)
+    polyglot (0.3.5)
     rack (1.5.2)
     rack-test (0.6.2)
       rack (>= 1.0)
