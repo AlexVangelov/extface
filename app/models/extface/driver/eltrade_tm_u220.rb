@@ -118,15 +118,18 @@ module Extface
     
     def sale_and_pay_items_session(items = [], operator = "1", password = "1")
       device.session("Fiscal Doc") do |s|
-        s.notify "Fiscal Doc Start"
+        s.notify "Open Fiscal Receipt"
         s.open_receipt
+        s.notify "Register Sale"
         items.each do |item|
           s.send_plu build_sale_data(item[:price], item[:text1], nil, item[:tax_group], item[:qty], nil, nil, item[:number])
           s.send_comment(item[:text2]) unless item[:text2].blank?
         end
+        s.notify "Register Payment"
         s.send_payment
+        s.notify "Close Fiscal Receipt"
         s.close_receipt
-        s.notify "Fiscal Doc End"
+        s.notify "Fiscalization Completed!"
       end
     end
     
