@@ -1,3 +1,7 @@
+## 0.2.4
+   - Driver Control Panel
+   - Print on fiscal device as non fiscal doc
+
 ## 0.2.3
    - Driver IO data logger
 

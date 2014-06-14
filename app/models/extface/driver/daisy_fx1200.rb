@@ -85,7 +85,7 @@ module Extface
     end
     
     def close_non_fiscal_doc
-      s.fsend Sales::END_NON_FISCAL_DOC
+      fsend Sales::END_NON_FISCAL_DOC
       @print_session = false
     end
     
