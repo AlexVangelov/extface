@@ -80,15 +80,30 @@ module Extface
     def non_fiscal_test
       device.session("Non Fiscal Text") do |s|
         s.notify "Printing Non Fiscal Text"
-        s.open_receipt Receipt::Variant::START_COMMENT_RECEIPT
+        s.open_non_fiscal_doc
         s.send_comment "********************************"
         s.send_comment "Extface Print Test".center(32)
         s.send_comment "********************************"
         s.send_comment ""
         s.send_comment "Driver: " + "#{self.class::NAME}".truncate(24)
-        s.close_receipt
+        s.close_non_fiscal_doc
         s.notify "Printing finished"
       end
+    end
+    
+    def open_non_fiscal_doc
+      open_receipt Receipt::Variant::START_COMMENT_RECEIPT
+      @print_session = true
+    end
+    
+    def print(text)
+      raise "Not in print session" unless @print_session
+      send_comment text
+    end
+    
+    def close_non_fiscal_doc
+      close_receipt
+      @print_session = false
     end
     
     def fiscal_test

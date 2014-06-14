@@ -74,6 +74,21 @@ module Extface
       end
     end
     
+    def open_non_fiscal_doc
+      fsend Sales::START_NON_FISCAL_DOC
+      @print_session = true
+    end
+    
+    def print(text)
+      raise "Not in print session" unless @print_session
+      fsend Sales::PRINT_NON_FISCAL_TEXT, text
+    end
+    
+    def close_non_fiscal_doc
+      s.fsend Sales::END_NON_FISCAL_DOC
+      @print_session = false
+    end
+    
     def fiscal_test
       sale_and_pay_items_session([
         { price: 0.01, text1: "Extface Test" }

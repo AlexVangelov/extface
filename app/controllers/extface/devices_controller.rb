@@ -51,7 +51,21 @@ module Extface
 
     def test_page
       set_device
-      @job = @device.driver.print_test_page if params[:test_page]
+      if @device.fiscal?
+        @job = @device.session("Print Test") do |s|
+          s.notify "Printing Text"
+          s.open_non_fiscal_doc
+          s.print "********************************"
+          s.print "Extface Print Test".center(32)
+          s.print "********************************"
+          s.print ""
+          s.print "Driver: " + "#{@device.driver.class::NAME}".truncate(24)
+          s.close_non_fiscal_doc
+          s.notify "Printing finished"
+        end
+      else
+        @job = @device.driver.print_test_page if params[:test_page]
+      end
       render action: :show
     end
     

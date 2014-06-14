@@ -66,7 +66,9 @@
 
 <hr />
 
-<% if @device.print? %>
+<%= driver_control @device.driver %>
+
+<% if true #@device.print? %>
   <%= button_to 'Print Test Page', test_page_device_path(@device), remote: true, name: :test_page, value: true, class: 'btn btn-warning' %>
 <% end %>
 <% if @device.fiscal? %>

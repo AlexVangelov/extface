@@ -36,5 +36,16 @@ module Extface
       end
     end
 
+    def driver_control(driver)
+      content_tag(:div, class: 'panel panel-default') do
+        content_tag(:div, class: 'panel-heading') do
+          "#{driver.class::NAME} #{t('.control_panel')}".html_safe
+        end +
+        content_tag(:div, class: 'panel-body') do
+          render "extface/driver/#{driver.class.name.demodulize.underscore}/control"
+        end
+      end
+    end
+
   end
 end
