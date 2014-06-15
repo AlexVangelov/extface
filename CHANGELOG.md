@@ -1,3 +1,7 @@
+## 0.2.5
+   - Fiscal driver base writing rules
+   - Eltrade fp report dates
+
 ## 0.2.4
    - Driver Control Panel
    - Print on fiscal device as non fiscal doc
