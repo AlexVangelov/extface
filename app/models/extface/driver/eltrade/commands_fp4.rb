@@ -36,7 +36,11 @@ module Extface
       PRINT_RECEIPT_HEADER  = 0x38
     end
     module Reports
-      SILENT0_PLU           = 0x22
+      FP_DETAILED_BLOCKS    = 0x1C
+      FP_GENERAL_BLOCKS     = 0x1D
+      FP_DETAILED_DATES     = 0x1E
+      FP_GENERAL_DATES      = 0x1F
+      SILENT_PLU            = 0x22
       SILENT_PRINTER        = 0x23
       PLU_REPORT            = 0x32
       DAILY_REPORT          = 0x33

@@ -23,7 +23,7 @@ module Extface
     #reports
     def z_report_session() raise_not_implemented end
     def x_report_session() raise_not_implemented end
-    def period_report_session(from, to) raise_not_implemented end
+    def period_report_session(from, to, detailed = true) raise_not_implemented end
     
     #repair interrupted doc
     def cancel_doc_session() raise_not_implemented end

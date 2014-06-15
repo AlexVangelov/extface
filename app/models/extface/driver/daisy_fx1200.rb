@@ -84,7 +84,7 @@ module Extface
       end
     end
     
-    def period_report_session(from, to)
+    def period_report_session(from, to, detailed = true)
     end
     
     #print

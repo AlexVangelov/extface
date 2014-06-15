@@ -68,25 +68,14 @@
 
 <%= driver_control @device.driver %>
 
-<% if true #@device.print? %>
-  <%= button_to 'Print Test Page', test_page_device_path(@device), remote: true, name: :test_page, value: true, class: 'btn btn-warning' %>
-<% end %>
-<% if @device.fiscal? %>
-  <%= button_to 'Non Fiscal Test', fiscal_device_path(@device), remote: true, name: :non_fiscal_test, value: true, class: 'btn btn-warning' %>
-  <%= button_to 'Fiscal Test', fiscal_device_path(@device), remote: true, name: :fiscal_test, value: true, class: 'btn btn-warning' %>
-  <%= button_to 'X Report', fiscal_device_path(@device), remote: true, name: :x_report, value: true, class: 'btn btn-warning' %>
-  <%= button_to 'Z Report', fiscal_device_path(@device), remote: true, name: :z_report, value: true, class: 'btn btn-warning' %>
-  <%= button_to 'Cancel Fiscal Doc', fiscal_device_path(@device), remote: true, name: :cancel_fiscal_doc, value: true, class: 'btn btn-warning' %>
-<% end %>
-
-<br />Simulate push data from device
+<!-- <br />Simulate push data from device
 
     <div class="input-group">
       <input type="text" id='data' class="form-control">
       <span class="input-group-btn">
         <%= link_to 'Push', extface.push_url(@device.uuid), id: :push, class: 'btn btn-warning'%>
       </span>
-    </div><!-- /input-group -->
+    </div>-->
 
 <h1>Jobs</h1>
 <table class='table'>

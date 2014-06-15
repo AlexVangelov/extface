@@ -42,7 +42,26 @@ module Extface
           "#{driver.class::NAME} #{t('.control_panel')}".html_safe
         end +
         content_tag(:div, class: 'panel-body') do
-          render "extface/driver/#{driver.class.name.demodulize.underscore}/control"
+          content_tag(:div, class: 'col-sm-8') do
+            control_partial = "extface/driver/#{driver.class.name.demodulize.underscore}/control"
+            begin
+              render control_partial
+            rescue ActionView::MissingTemplate
+              case
+              when driver.fiscal? then 
+                render "extface/driver/control_fiscal"
+              when driver.print? then 
+                render "extface/driver/control_print"
+              when driver.report? then 
+                render "extface/driver/control_report"
+              else
+                render "extface/driver/control_raw"
+              end
+            end
+          end +
+          content_tag(:div, class: 'col-sm-4') do
+            text_area_tag :extface_control_monitor, nil, rows: 8, class: 'form-control'
+          end
         end
       end
     end
