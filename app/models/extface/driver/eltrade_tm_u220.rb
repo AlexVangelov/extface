@@ -5,17 +5,8 @@
 #AAh    55h    0–FFh   0–FFh  10h–70h  0-FFh  30h–3Fh  0-FFh
 
 module Extface
-  class Driver::EltradeTmU220 < Extface::Driver
-    NAME = 'Eltrade TM-U220 (Serial)'.freeze
-    GROUP = Extface::FISCAL_DRIVER
-    
-    DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
-    
-    # Select driver features
-    RAW = true  #responds to #push(data) and #pull
-    PRINT = false #POS, slip printers
-    FISCAL = true #cash registers, fiscal printers
-    REPORT = false #only transmit data that must be parsed by handler, CDR, report devices 
+  class Driver::EltradeTmU220 < Extface::Driver::Base::Fiscal
+    NAME = 'Eltrade TM-U220 (Serial)'.freeze 
     
     RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #count
@@ -43,111 +34,28 @@ module Extface
       return bytes_processed
     end
     
-    def open_receipt(variant = nil)
-      fsend Receipt::OPEN_RECEIPT
-      unless variant.blank?
-        fsend Receipt::PRINT_RECEIPT, variant
-      end
-      status = get_printer_status
-    end
-    
-    def close_receipt
-      fsend Receipt::CLOSE_RECEIPT
-      status = get_printer_status
-    end
-    
-    def send_comment(text)
-      fsend Receipt::PRINT_RECEIPT, Receipt::Variant::COMMENT + text
-      status = get_printer_status
-    end
-    
-    def send_plu(plu_data)
-      fsend Receipt::PRINT_RECEIPT, Receipt::Variant::PLU + plu_data
-      status = get_printer_status
-    end
-    
-    def send_payment(type_num = 0, value = nil) # 0, 1, 2, 3
-      value_bytes = "\x00\x00\x00\x00" # recalculate
-      unless value.nil?
-        value_units = (value * 100).to_i # !FIXME
-        value_bytes = "".b
-        4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
-      end
-      fsend Receipt::PRINT_RECEIPT, "" << (9 + type_num).chr << value_bytes
-      status = get_printer_status
-    end
-    
+    #tests
     def non_fiscal_test
       device.session("Non Fiscal Text") do |s|
         s.notify "Printing Non Fiscal Text"
         s.open_non_fiscal_doc
-        s.send_comment "********************************"
-        s.send_comment "Extface Print Test".center(32)
-        s.send_comment "********************************"
-        s.send_comment ""
-        s.send_comment "Driver: " + "#{self.class::NAME}".truncate(24)
+        s.print "********************************"
+        s.print "Extface Print Test".center(32)
+        s.print "********************************"
+        s.print ""
+        s.print "Driver: " + "#{self.class::NAME}".truncate(24)
         s.close_non_fiscal_doc
         s.notify "Printing finished"
       end
     end
     
-    def open_non_fiscal_doc
-      open_receipt Receipt::Variant::START_COMMENT_RECEIPT
-      @print_session = true
-    end
-    
-    def print(text)
-      raise "Not in print session" unless @print_session
-      send_comment text
-    end
-    
-    def close_non_fiscal_doc
-      close_receipt
-      @print_session = false
-    end
-    
     def fiscal_test
       sale_and_pay_items_session([
-        { price: 0.01, text1: "Extface Test" }
+        SaleItem.new( price: 0.01, text1: "Extface Test" )
       ])
     end
     
-    def build_sale_data(price, text1 = "", text2 = nil, tax_group = 2, qty = 1, percent = nil, neto = nil, number = nil)
-      "".b.tap() do |data|
-        price_units = (price * 100).to_i # !FIXME
-        price_bytes = "".b
-        4.times{ |shift| price_bytes.insert 0, ((price_units >> shift*8) & 0xff).chr }
-        data << price_bytes
-        qty_units = ((qty || 1) * 1000).to_i # !FIXME
-        qty_bytes = "".b
-        4.times{ |shift| qty_bytes.insert 0, ((qty_units >> shift*8) & 0xff).chr }
-        data << qty_bytes
-        data << "\x00".b #number len FIXME
-        data << "\xAA\xAA\xAA\xAA\xAA\xAA".b #number FIXME
-        text = text1.truncate(20)
-        data << text.length.chr
-        data << text.ljust(20, " ").b
-        data << (tax_group || 2).chr
-      end
-    end
-    
-    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
-      device.session("Fiscal Doc") do |s|
-        s.notify "Open Fiscal Receipt"
-        s.open_receipt
-        s.notify "Register Sale"
-        items.each do |item|
-          s.send_plu build_sale_data(item[:price], item[:text1], nil, item[:tax_group], item[:qty], nil, nil, item[:number])
-          s.send_comment(item[:text2]) unless item[:text2].blank?
-        end
-        s.notify "Register Payment"
-        s.send_payment
-        s.notify "Close Fiscal Receipt"
-        s.close_receipt
-        s.notify "Fiscalization Completed!"
-      end
-    end
-    
+    #reports
     def z_report_session
       device.session("Z Report") do |s|
         s.notify "Z Report Start"
@@ -166,19 +74,93 @@ module Extface
       end
     end
     
+    def period_report_session(from, to)
+    end
+    
     def cancel_doc_session
       device.session("Doc cancel") do |s|
         s.notify "Doc Cancel Start"
         # cancel old one by open/close new one
-        s.open_receipt
-        s.close_receipt
+        s.open_fiscal_doc
+        s.close_fiscal_doc
         s.notify "Doc Cancel End"
       end
     end
     
-    def check_ready!
-      fsend Info::GET_STATUS
-      raise errors.full_messages.join(", ") if errors.any?
+    #print
+    def open_non_fiscal_doc
+      open_receipt Receipt::Variant::START_COMMENT_RECEIPT
+      @print_session = true
+    end
+    
+    def print(text)
+      raise "Not in print session" unless @print_session
+      send_comment text
+    end
+    
+    def close_non_fiscal_doc
+      raise "Not in print session" unless @print_session
+      close_receipt
+      @print_session = false
+    end
+
+
+    #fiscal
+    def open_fiscal_doc(operator = '', password = '')
+      set_operatior(operator) if operator.present?
+      open_receipt
+      @fiscal_session = true
+    end
+    
+    def close_fiscal_doc
+      raise "Not in fiscal session" unless @fiscal_session
+      close_receipt
+      @fiscal_session = false
+    end
+    
+    def add_sale(sale_item)
+      raise "Not in fiscal session" unless @fiscal_session
+      send_plu build_sale_data(sale_item)
+      add_comment(sale_item.text2) if sale_item.text2.present?
+    end
+    
+    def add_comment(text)
+      raise "Not in fiscal session" unless @fiscal_session
+      send_comment text
+    end
+    
+    def add_payment(type_num = 0, value = nil) # 0, 1, 2, 3
+      raise "Not in fiscal session" unless @fiscal_session
+      value_bytes = "\x00\x00\x00\x00" # recalculate
+      unless value.nil?
+        value_units = (value * 100).to_i # !FIXME
+        value_bytes = "".b
+        4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
+      end
+      fsend Receipt::PRINT_RECEIPT, "" << (9 + type_num).chr << value_bytes
+      status = get_printer_status
+    end
+    
+    def total_payment
+      raise "Not in fiscal session" unless @fiscal_session
+      add_payment
+    end
+
+    #basket
+    def sale_and_pay_items_session(items = [], operator = '', password = '')
+      device.session("Fiscal Doc") do |s|
+        s.notify "Open Fiscal Receipt"
+        s.open_fiscal_doc operator, password
+        s.notify "Register Sale"
+        items.each do |item|
+          s.add_sale(item)
+        end
+        s.notify "Register Payment"
+        s.total_payment
+        s.notify "Close Fiscal Receipt"
+        s.close_fiscal_doc
+        s.notify "Fiscalization Completed!"
+      end
     end
     
     def get_printer_status
@@ -254,15 +236,58 @@ module Extface
       end
     end
     
-    def check_sum(buffer)
-      sum = 0
-      buffer.each_byte do |byte|
-        sum -= byte
-      end
-      sum & 0xff
-    end
-    
     private
+      def open_receipt(variant = nil)
+        fsend Receipt::OPEN_RECEIPT
+        unless variant.blank?
+          fsend Receipt::PRINT_RECEIPT, variant
+        end
+        status = get_printer_status
+      end
+      
+      def close_receipt
+        fsend Receipt::CLOSE_RECEIPT
+        status = get_printer_status
+      end
+      
+      def send_comment(text)
+        fsend Receipt::PRINT_RECEIPT, Receipt::Variant::COMMENT + text
+        status = get_printer_status
+      end
+      
+      def send_plu(plu_data)
+        fsend Receipt::PRINT_RECEIPT, Receipt::Variant::PLU + plu_data
+        status = get_printer_status
+      end
+      
+      #def build_sale_data(price, text1 = "", text2 = nil, tax_group = 2, qty = 1, percent = nil, neto = nil, number = nil)
+      def build_sale_data(sale_item)
+        "".b.tap() do |data|
+          price_units = (sale_item.price * 100).to_i # !FIXME
+          price_bytes = "".b
+          4.times{ |shift| price_bytes.insert 0, ((price_units >> shift*8) & 0xff).chr }
+          data << price_bytes
+          qty_units = ((sale_item.qty || 1) * 1000).to_i # !FIXME
+          qty_bytes = "".b
+          4.times{ |shift| qty_bytes.insert 0, ((qty_units >> shift*8) & 0xff).chr }
+          data << qty_bytes
+          data << "\x00".b #number len FIXME
+          data << "\xAA\xAA\xAA\xAA\xAA\xAA".b #number FIXME
+          text = sale_item.text1.truncate(20)
+          data << text.length.chr
+          data << text.ljust(20, " ").b
+          data << (sale_item.tax_group || 2).chr
+        end
+      end
+      
+      def check_sum(buffer)
+        sum = 0
+        buffer.each_byte do |byte|
+          sum -= byte
+        end
+        sum & 0xff
+      end
+
       def sequence_number(increment = true)
         @seq ||= 0
         @seq += 1 if increment
@@ -308,7 +333,6 @@ module Extface
           end
           
           def response_code_validation
-            p "############################### #{cmd.ord.to_s(16)}"
             case cmd.ord
             when 0x2c then
               case data[0] # printer error code

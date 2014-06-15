@@ -11,17 +11,8 @@
 #01h   20h–FFh 20h–FFh 20h–FFh  20h–FFh  04h  80h–FFh  05h  30h–3Fh  03h
 
 module Extface
-  class Driver::DaisyFx1200 < Extface::Driver
+  class Driver::DaisyFx1200 < Extface::Driver::Base::Fiscal
     NAME = 'Daisy FX1200 (Serial)'.freeze
-    GROUP = Extface::FISCAL_DRIVER
-    
-    DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
-    
-    # Select driver features
-    RAW = true  #responds to #push(data) and #pull
-    PRINT = false #POS, slip printers
-    FISCAL = true #cash registers, fiscal printers
-    REPORT = false #only transmit data that must be parsed by handler, CDR, report devices  
     
     RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #seconds
@@ -55,72 +46,28 @@ module Extface
       end
     end
     
-    def autocut(partial = true) # return "P" - success, "F" - failed
-      resp = fsend(Printer::CUT)
-      resp == "P"
-    end
-     
+    #tests
     def non_fiscal_test
       device.session("Non Fiscal Text") do |s|
         s.notify "Printing Non Fiscal Text"
-        s.fsend Sales::START_NON_FISCAL_DOC
-        s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
-        s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Extface Print Test".center(32)
-        s.fsend Sales::PRINT_NON_FISCAL_TEXT, "********************************"
+        s.open_non_fiscal_doc
+        s.print "********************************"
+        s.print "Extface Print Test".center(32)
+        s.print "********************************"
         s.fsend Printer::MOVE, "1"
-        s.fsend Sales::PRINT_NON_FISCAL_TEXT, "Driver: " + "#{self.class::NAME}".truncate(24)
-        s.fsend Sales::END_NON_FISCAL_DOC
+        s.print "Driver: " + "#{self.class::NAME}".truncate(24)
+        s.close_non_fiscal_doc
         s.notify "Printing finished"
       end
     end
     
-    def open_non_fiscal_doc
-      fsend Sales::START_NON_FISCAL_DOC
-      @print_session = true
-    end
-    
-    def print(text)
-      raise "Not in print session" unless @print_session
-      fsend Sales::PRINT_NON_FISCAL_TEXT, text
-    end
-    
-    def close_non_fiscal_doc
-      fsend Sales::END_NON_FISCAL_DOC
-      @print_session = false
-    end
-    
     def fiscal_test
       sale_and_pay_items_session([
-        { price: 0.01, text1: "Extface Test" }
+        SaleItem.new( price: 0.01, text1: "Extface Test" )
       ])
     end
     
-    def build_sale_data(price, text1 = nil, text2 = nil, tax_group = 2, qty = nil, percent = nil, neto = nil)
-      "".tap() do |data|
-        data << text1 unless text1.blank?
-        data << "\x0a#{text2}" unless text2.blank?
-        data << "\t"
-        data << TAX_GROUPS_MAP[tax_group || 2]
-        data << price.to_s
-        data << "*#{qty.to_s}" unless qty.blank?
-        data << ",#{percent}" unless percent.blank?
-        data << "$#{neto}" unless neto.blank?
-      end
-    end
-    
-    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
-      device.session("Fiscal Doc") do |s|
-        s.notify "Fiscal Doc Start"
-        s.fsend Sales::START_FISCAL_DOC, "#{operator || "1"},#{password || "1"},00001"
-        items.each do |item|
-          s.fsend Sales::SALE_AND_SHOW, build_sale_data(item[:price], item[:text1], item[:text2], item[:tax_group], item[:qty], item[:percent], item[:neto])
-        end
-        s.fsend(Sales::TOTAL, "\t")
-        s.fsend(Sales::END_FISCAL_DOC)
-        s.notify "Fiscal Doc End"
-      end
-    end
-    
+    #reports
     def z_report_session
       device.session("Z Report") do |s|
         s.notify "Z Report Start"
@@ -137,14 +84,88 @@ module Extface
       end
     end
     
+    def period_report_session(from, to)
+    end
+    
+    #print
+    def open_non_fiscal_doc
+      fsend Sales::START_NON_FISCAL_DOC
+      @print_session = true
+    end
+    
+    def print(text)
+      raise "Not in print session" unless @print_session
+      fsend Sales::PRINT_NON_FISCAL_TEXT, text
+    end
+    
+    def close_non_fiscal_doc
+      fsend Sales::END_NON_FISCAL_DOC
+      @print_session = false
+    end
+    
+    #fiscal
+    def open_fiscal_doc(operator = "1", password = "1")
+      fsend Sales::START_FISCAL_DOC, "#{operator.presence || "1"},#{password.presence || "1"},00001"
+      @fiscal_session = true
+    end
+    
+    def close_fiscal_doc
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend Sales::END_FISCAL_DOC
+      @fiscal_session = false
+    end
+    
+    def add_sale(sale_item)
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend Sales::SALE_AND_SHOW, build_sale_data(sale_item)
+    end
+    
+    def add_comment(text)
+      raise "Not in fiscal session" unless @fiscal_session
+    end
+    
+    def add_payment(type_num)
+      raise "Not in fiscal session" unless @fiscal_session
+    end
+    
+    def total_payment
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend(Sales::TOTAL, "\t")
+    end
+    
+    #basket
+    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
+      device.session("Fiscal Doc") do |s|
+        s.notify "Fiscal Doc Start"
+        s.open_fiscal_doc
+        s.notify "Register Sale"
+        items.each do |item|
+          s.add_sale(item)
+        end
+        s.notify "Register Payment"
+        s.total_payment
+        s.notify "Close Fiscal Receipt"
+        s.close_fiscal_doc
+        s.notify "Fiscal Doc End"
+      end
+    end
+    
     def cancel_doc_session
       device.session("Doc cancel") do |s|
         s.notify "Doc Cancel Start"
         s.fsend Sales::CANCEL_DOC
+        s.autocut
         s.notify "Doc Cancel End"
       end
     end
-    
+
+    #other
+    def autocut(partial = true) # return "P" - success, "F" - failed
+      resp = fsend(Printer::CUT)
+      resp == "P"
+    end
+
+    # auto called for session, return true for OK
     def check_status
       flush
       fsend(Info::STATUS) # return 6 byte status
@@ -163,16 +184,7 @@ module Extface
         packet << ETX
       end
     end
-    
-    def fsend!(cmd, data = "") # return data or raise
-      push build_packet(cmd, data) # return 6 byte status
-      if resp = frecv(RESPONSE_TIMEOUT)
-        return resp.data if resp.valid?
-      else
-        raise errors.full_messages.join(', ')
-      end
-    end
-    
+
     def fsend(cmd, data = "") #return data or nil
       packet_data = build_packet(cmd, data)
       result = false
@@ -199,7 +211,20 @@ module Extface
       end
     end
    
-    private 
+    private
+      def build_sale_data(item)
+        "".tap() do |data|
+          data << item.text1 unless item.text1.blank?
+          data << "\x0a#{text2}" unless item.text2.blank?
+          data << "\t"
+          data << TAX_GROUPS_MAP[item.tax_group || 2]
+          data << item.price.to_s
+          data << "*#{item.qty.to_s}" unless item.qty.blank?
+          data << ",#{item.percent}" unless item.percent.blank?
+          data << "$#{neto}" unless item.neto.blank?
+        end
+      end
+    
       def bcc(buffer)
         sum = 0
         buffer.each_byte do |byte|
