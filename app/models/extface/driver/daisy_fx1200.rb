@@ -15,7 +15,9 @@ module Extface
     NAME = 'Daisy FX1200 (Serial)'.freeze
     
     RESPONSE_TIMEOUT = 3  #seconds
-    INVALID_FRAME_RETRIES = 6  #seconds
+    INVALID_FRAME_RETRIES = 6  #count (bad length, bad checksum)
+    ACKS_MAX_WAIT = 60 #count / nothing is forever
+    NAKS_MAX_COUNT = 3 #count
     
     TAX_GROUPS_MAP = {
       1 => "\xc0",
@@ -33,16 +35,12 @@ module Extface
     include Extface::Driver::Daisy::CommandsFx1200
 
     def handle(buffer) #buffer is filled with multiple pushes, wait for full frame (ACKs)STX..PA2..PA1..ETX
-      if buffer[/^\x16+$/] # skip if only ACKs
-        return buffer.length 
+      if frame_len = buffer.index("\x03") || buffer.index("\x16") || buffer.index("\x15")
+        rpush buffer[0..frame_len]
+        return frame_len+1 # return number of bytes processed
       else
-        if frame_len = buffer.index("\x03") || buffer.index("\x15")
-          rpush buffer[0..frame_len]
-          return frame_len+1 # return number of bytes processed
-        else
-          #TODO check buffer.length
-          return 0 #no bytes processed
-        end
+        #TODO check buffer.length
+        return 0 #no bytes processed
       end
     end
     
@@ -188,16 +186,35 @@ module Extface
     def fsend(cmd, data = "") #return data or nil
       packet_data = build_packet(cmd, data)
       result = false
-      INVALID_FRAME_RETRIES.times do |retries|
+      invalid_frames = 0
+      nak_messages = 0
+      push packet_data
+      ACKS_MAX_WAIT.times do |retries|
         errors.clear
         push packet_data
         if resp = frecv(RESPONSE_TIMEOUT)
           if resp.valid?
-            result = resp.data
+            human_status_errors(resp.status)
+            result = resp.data if errors.empty?
             break
+          else #ack, nak or bad
+            if resp.nak?
+              nak_messages += 1
+              if nak_messages > NAKS_MAX_COUNT
+                errors.add :base, "#{NAKS_MAX_COUNT} NAKs Received. Abort!"
+                break
+              end
+            elsif !resp.ack?
+              invalid_frames += 1
+              if nak_messages > INVALID_FRAME_RETRIES
+                errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
+                break
+              end
+            end
+            push packet_data unless resp.ack?
           end
         end
-        errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
+        errors.add :base, "#{ACKS_MAX_WAIT} ACKs Received. Abort!"
       end
       return result
     end
@@ -313,26 +330,46 @@ module Extface
             @frame = match.to_a.first
             @len, @seq, @cmd, @data, @status, @bcc = match.captures
           else
-            #TODO look for NAK
+            if buffer[/^\x16+$/] # only ACKs
+              @ack = true
+            elsif buffer.index("\x15")
+              @nak = true
+            end
           end
         end
         
+        def ack?  #should wait, response is yet to come
+          !!@ack
+        end
+        
+        def nak?  #should retry command with same seq
+          !!@nak
+        end
+        
         private
+          def unpacked_msg?
+            ack? || nak?
+          end
+ 
           def bcc_validation
-            sum = 0
-            frame[1..-6].each_byte do |byte|
-              sum += byte
-            end
-            calc_bcc = "".tap() do |tbcc|
-              4.times do |halfbyte|
-                tbcc.insert 0, (0x30 + ((sum >> (halfbyte*4)) & 0x0f)).chr
+            unless unpacked_msg?
+              sum = 0
+              frame[1..-6].each_byte do |byte|
+                sum += byte
+              end unless frame.nil?
+              calc_bcc = "".tap() do |tbcc|
+                4.times do |halfbyte|
+                  tbcc.insert 0, (0x30 + ((sum >> (halfbyte*4)) & 0x0f)).chr
+                end
               end
+              errors.add(:bcc, I18n.t('errors.messages.invalid')) if bcc != calc_bcc
             end
-            errors.add(:bcc, I18n.t('errors.messages.invalid')) if bcc != calc_bcc
           end
           
           def len_validation
-            errors.add(:len, I18n.t('errors.messages.invalid')) if len.ord != (frame[1..-6].length + 0x20)
+            unless unpacked_msg?
+              errors.add(:len, I18n.t('errors.messages.invalid')) if frame.nil? || len.ord != (frame[1..-6].length + 0x20)
+            end
           end
       end
   end

@@ -2,6 +2,8 @@ module Extface
   class ApplicationController < ActionController::Base
     prepend_before_filter :include_extra_module
     
+    helper_method :extface
+    
     def index
     end
     
@@ -16,6 +18,10 @@ module Extface
       
       def include_extra_module
         self.class.send(:include, extface_mapping.i_extra_module) if extface_mapping.i_extra_module.present?
+      end
+      
+      def extface
+        try(extface_mapping.mount_point) || super # rails 4.1 fixed named route for engines mounted for resources
       end
   end
 end

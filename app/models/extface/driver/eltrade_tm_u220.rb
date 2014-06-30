@@ -213,9 +213,10 @@ module Extface
           if stat_frame.valid?
             break if stat_frame.ready?
           else
-            status_invalid_responses -= 1
-            unless status_invalid_responses < INVALID_FRAME_RETRIES
+            status_invalid_responses += 1
+            if status_invalid_responses > INVALID_FRAME_RETRIES
               errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
+              break
             end
           end
         end
