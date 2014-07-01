@@ -191,12 +191,15 @@ module Extface
       push packet_data
       ACKS_MAX_WAIT.times do |retries|
         errors.clear
-        push packet_data
         if resp = frecv(RESPONSE_TIMEOUT)
           if resp.valid?
             human_status_errors(resp.status)
-            result = resp.data if errors.empty?
-            break
+            if errors.empty?
+              result = resp.data
+              break
+            else
+              raise errors.full_messages.join(',')
+            end
           else #ack, nak or bad
             if resp.nak?
               nak_messages += 1
@@ -274,13 +277,13 @@ module Extface
         
         #errors.add :base, "Print Doc Allowed" unless (status[2].ord & 0x40).zero?
         #errors.add :base, "Non Fiscal Doc Open" unless (status[2].ord & 0x20).zero?
-        errors.add :base, "Less Paper (Control)" unless (status[2].ord & 0x20).zero?
+        #errors.add :base, "Less Paper (Control)" unless (status[2].ord & 0x20).zero?
         #errors.add :base, "Fiscal Doc Open" unless (status[2].ord & 0x08).zero?
         errors.add :base, "No Paper (Control)" unless (status[2].ord & 0x04).zero?
         errors.add :base, "Less Paper" unless (status[2].ord & 0x02).zero?
         errors.add :base, "No Paper" unless (status[2].ord & 0x01).zero?
         
-        case (status[3] & 0x7f)
+        case (status[3].ord & 0x7f)
           when 1 then errors.add :base, "Operation will result in the overflow"
           when 3 then errors.add :base, "No more sales for this doc"
           when 4 then errors.add :base, "No more payments for this doc"

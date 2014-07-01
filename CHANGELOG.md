@@ -1,3 +1,7 @@
+## 0.2.6
+   - Daisy driver further elaborated
+   - Rails 4.1 engine mounted in resources block fix
+
 ## 0.2.5
    - Fiscal driver base writing rules
    - Eltrade fp report dates
