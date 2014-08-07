@@ -1,3 +1,8 @@
+## 0.4.0
+   - Fix Rails 4.1 live stream close without sending any data
+   - Single device jobs in queue
+   - Limit SSE to 15 sec (TODO reconnect + named events)
+
 ## 0.2.6
    - Daisy driver further elaborated
    - Rails 4.1 engine mounted in resources block fix

@@ -15,6 +15,7 @@ module Extface
       else
         stream_job
       end
+      response.stream.write ''
     rescue => e
       p e.message
       render nothing: true, status: :internal_server_error
@@ -41,6 +42,7 @@ module Extface
         #stream_job # stream right now :)
         status = :ok
       end
+      response.stream.write ''
     rescue => e
       p e.message
       render nothing: true, status: :internal_server_error

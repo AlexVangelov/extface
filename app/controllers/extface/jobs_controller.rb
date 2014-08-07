@@ -14,16 +14,20 @@ module Extface
       else
         #redis = Redis.new
         response.stream.write("data: Job #{@job.id} waiting for device connection...\n\n")
-        Extface.redis_block do |r|
-          r.subscribe(@job.id) do |on|
-            on.message do |event, data|
-              #p "data: #{data}\n\n"
-              response.stream.write("data: #{data}\n\n") unless data == 'OK'
-              r.unsubscribe if data == "Job #{@job.id} completed!" || data == "Job #{@job.id} failed!"
+        Timeout.timeout(Extface.device_timeout) do #never stay too long, TODO add SSE option to reconnect
+          Extface.redis_block do |r|
+            r.subscribe(@job.id) do |on|
+              on.message do |event, data|
+                p "@@@@ #{event}: #{data}\n\n"
+                response.stream.write("data: #{data}\n\n") unless data == 'OK'
+                r.unsubscribe if data == "Job #{@job.id} completed!" || data == "Job #{@job.id} failed!" #FIXME stupid
+              end
             end
           end
         end
       end
+    rescue Timeout::Error
+      #TODO invite reconnect
     ensure
       response.stream.close
     end

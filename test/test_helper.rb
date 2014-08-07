@@ -23,7 +23,7 @@ end
 module Extface
   class ActionController::TestCase
     setup do
-      @routes = Engine.routes
+      @routes = Extface::Engine.routes
     end
   end
 end
