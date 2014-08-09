@@ -1,0 +1,14 @@
+Description:
+    Generate new device driver skeleton. There are 4 driver categories:
+    RAW - any non-profiled device (send and receive data)
+    PRINT - print and render functionality
+    FISCAL - fiscal memory devices, process of Billing::Bill object (require gem billing)
+    REPORT - logging devices (receive only)
+
+Example:
+    `rails generate extface:driver vendor/device_name [raw|print|fiscal|report]`
+
+    This will create:
+        app/models/extface/driver/<vendor>/<device_name>.rb
+        app/views/extface/driver/<vendor>/<device_name>/_settings.html.erb
+        test/models/extface/driver/<vendor>/<device_name>_test.rb
