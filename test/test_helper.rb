@@ -25,5 +25,17 @@ module Extface
     setup do
       @routes = Extface::Engine.routes
     end
+    module Behavior
+      def process_with_shop(action, http_method = 'GET', parameters = nil, session = nil, flash = nil)
+        parameters = { shop_id: shops(:one) }.merge(parameters || {})
+        process_without_shop(action, http_method, parameters, session, flash)
+      end
+      alias_method_chain :process, :shop
+    end
+  end
+  class ActionDispatch::Routing::RouteSet
+    def default_url_options(options={})
+      options.merge(shop_id: Shop.first)
+    end
   end
 end

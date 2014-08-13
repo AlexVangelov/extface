@@ -31,7 +31,7 @@ module Extface
           "#{driver.class::NAME} #{t('.settings')}".html_safe
         end +
         content_tag(:div, class: 'panel-body') do
-          render "extface/driver/#{driver.class.name.demodulize.underscore}/settings", form: form
+          render "#{driver.class.name.underscore}/settings", form: form
         end
       end
     end
@@ -43,7 +43,7 @@ module Extface
         end +
         content_tag(:div, class: 'panel-body') do
           content_tag(:div, class: 'col-sm-8') do
-            control_partial = "extface/driver/#{driver.class.name.demodulize.underscore}/control"
+            control_partial = "#{driver.class.name.underscore}/control"
             begin
               render control_partial
             rescue ActionView::MissingTemplate

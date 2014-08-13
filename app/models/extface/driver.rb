@@ -47,7 +47,7 @@ module Extface
     def push(buffer)
       if @job
         #retry if current device job is not @job (waiting on queue)
-        wait_on_queue = false
+        wait_on_queue = 20 #stop me writing endless things
         begin
           if current_device_job = device.jobs(true).active.try(:first)
             if current_device_job != @job
@@ -70,8 +70,7 @@ module Extface
             end
           end
         rescue Timeout::Error
-          p "###########3 timeout err"
-          retry if wait_on_queue
+          (wait_on_queue -= 1) > 0 ? retry : raise(e) #let it be!
         end
       else
         raise "No job given"

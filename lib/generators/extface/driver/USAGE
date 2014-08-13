@@ -11,4 +11,5 @@ Example:
     This will create:
         app/models/extface/driver/<vendor>/<device_name>.rb
         app/views/extface/driver/<vendor>/<device_name>/_settings.html.erb
+        app/views/extface/driver/<vendor>/<device_name>/_control.html.erb
         test/models/extface/driver/<vendor>/<device_name>_test.rb

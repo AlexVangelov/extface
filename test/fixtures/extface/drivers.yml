@@ -8,3 +8,6 @@ star_tsp200:
 
 star_scp700:
   type: Extface::Driver::StarScp700
+
+datecs_fp550:
+  type: Extface::Driver::Datecs::Fp550
