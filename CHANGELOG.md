@@ -1,3 +1,7 @@
+## 0.4.1
+  - Publish win32 client
+  - Daisy FP550 driver initial
+
 ## 0.4.0
    - Fix Rails 4.1 live stream close without sending any data
    - Single device jobs in queue
