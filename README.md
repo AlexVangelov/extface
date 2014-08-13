@@ -38,13 +38,24 @@ Extface engine will be visible at `link_to 'Extface', shop_extface_path(@shop)`
 Create a device with driver `Generic Pos Print`.
 Copy the `Pull URL`, visible on device's show page.
 
-To simulate client side of the system you can use bash script (replace the URL with your one):
+To simulate client side (one way communication) of the system you can use bash script (replace the URL with your one):
 
     while true; do RESULT=$(curl -u extface:extface -c extface -b extface -s http://localhost:3000/shops/1/shop_extface/bb6ac841cf239ab89b967352c40e4b39); if [ -z "$RESULT" ]; then sleep 5; else echo -e "$RESULT"; sleep 1; fi done
-  
+
 Hit The `Print Test Page` and you will see result in you console.
 
 Output can be forwarded to real device by adding ` > /dev/ttyS0` at the end example script.
+
+## Extface Client
+
+(Update 2014-08-13)
+To allow testing the module without having a hardware client, I just realize win32 version, available for download in `bin/extface_client_win32` [extface.exe](https://github.com/AlexVangelov/extface/blob/master/bin/extface_client_win32/extface.exe)
+It's fully featured client for tests and development. The only limit is that it does not support SSL and is not recommended to use in production.
+Command line options:
+
+    extface.exe PullUrl [PORT][,BoudRate][,ByteSyzeParityStopBits][,Control]
+    Options: Parity: E|M|N|O|S; StopBits: 1|1.5|2; Control: N|H|X (None|Hardware|XON/XOF)
+    Default: COM1,9600,8N1,N
 
 ## Usage
 
