@@ -109,3 +109,7 @@ Create `config/initializers/extface.rb`:
 ## Views & Layout
 
 Views as designed for twitter bootstrap CSS. Engine layout can be replaced by creating `app/views/layouts/extface/application.html.erb` in your engine/main_app.
+
+## Driver writing guide
+
+[http://alexvangelov.wordpress.com/2014/08/14/extface-driver-writing-guide-ruby](http://alexvangelov.wordpress.com/2014/08/14/extface-driver-writing-guide-ruby/)
