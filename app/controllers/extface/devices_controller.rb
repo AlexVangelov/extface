@@ -78,6 +78,7 @@ module Extface
           when params[:x_report].present? then @device.driver.x_report_session
           when params[:z_report].present? then @device.driver.z_report_session
           when params[:cancel_fiscal_doc].present? then @device.driver.cancel_doc_session
+          when params[:paper_cut].present? then @device.driver.paper_cut
         end
       end
       render action: :show

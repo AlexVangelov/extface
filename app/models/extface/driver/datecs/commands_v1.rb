@@ -22,5 +22,9 @@ module Extface
       GET_DATE_HOUR               = 0x3E
       GET_STATUS                  = 0x4A
     end
+    
+    module Printer
+      PAPER_CUT                   = 0x00
+    end
   end
 end
