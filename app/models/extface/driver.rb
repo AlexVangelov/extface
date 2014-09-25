@@ -51,7 +51,7 @@ module Extface
         begin
           if current_device_job = device.jobs(true).active.try(:first)
             if current_device_job != @job
-              wait_on_queue = true
+              #wait_on_queue = 20 #FIXME!
               p "#### current_job is not first_on_queue"
             end
           end
