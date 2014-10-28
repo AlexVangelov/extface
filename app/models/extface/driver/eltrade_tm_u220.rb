@@ -160,6 +160,22 @@ module Extface
       raise "Not in fiscal session" unless @fiscal_session
       add_payment
     end
+    
+    def payed_recv_account(value = 0.00, payment_type_num = 0)
+      raise "Incorrect Amount Value" if value.zero?
+      value_bytes = "\x00\x00\x00\x00" # recalculate
+      unless value.nil?
+        value_units = 0x100000000 + (value * 100).to_i # !FIXME
+        value_bytes = "".b
+        4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
+      end
+      device.session("Payed Out / Received on Account (#{value.to_s})") do |s|
+        s.notify "Payed / Received Start"
+        fsend Other::PAYED_RECV_ACCOUNT, "" << (1 + payment_type_num).chr << value_bytes
+        status = get_printer_status
+        s.notify "Payed / Received End"
+      end
+    end
 
     #basket
     def sale_and_pay_items_session(items = [], operator = '', password = '')

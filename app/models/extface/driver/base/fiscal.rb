@@ -52,6 +52,9 @@ module Extface
     
     #fiscal basket session of Extface::Driver::Base::Fiscal::SaleItem instances
     def sale_and_pay_items_session(sale_items = [], operator = '', password = '') raise_not_implemented end
+      
+    #other
+    def payed_recv_account(value = 0.00, payment_type_num = 0) raise_not_implemented end
     
     class SaleItem
       include ActiveModel::Validations

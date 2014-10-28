@@ -83,6 +83,14 @@ module Extface
       end
       render action: :show
     end
+    
+    def raw
+      set_device
+      if @device.raw?
+        @device.driver.test(params[:test])
+      end
+      render action: :show
+    end
 
     private
       # Use callbacks to share common setup or constraints between actions.

@@ -5,6 +5,7 @@ Extface::Engine.routes.draw do
     resources :jobs, only: [:show]
     post :test_page, on: :member
     post :fiscal, on: :member
+    post :raw, on: :member
   end
   
   get ':device_uuid' => 'handler#pull', as: :pull

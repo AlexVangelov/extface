@@ -112,6 +112,8 @@ module Extface
       errors.add :base, :not_implemented
       false
     end
+    
+    def serial?; false; end
 
     private
       def buffer_key
