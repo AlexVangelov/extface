@@ -70,7 +70,7 @@ module Extface
             end
           end
         rescue Timeout::Error
-          (wait_on_queue -= 1) > 0 ? retry : raise(e) #let it be!
+          (wait_on_queue -= 1) > 0 ? retry : raise("Timeout waiting on queue") #let it be!
         end
       else
         raise "No job given"

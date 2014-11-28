@@ -1,3 +1,6 @@
+## 0.4.2
+  - Eltrade fiscal report for period
+
 ## 0.4.1
   - Publish win32 client
   - Daisy FP550 driver initial

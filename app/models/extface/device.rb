@@ -57,15 +57,15 @@ module Extface
     
     #initial billing module fiscalization support
     def fiscalize(billing_account, detailed = false)
-      if billing_account.instance_of?(Billing::Bill) && billing_account.valid?
+      
         driver.sale_and_pay_items_session(
           [].tap() do |payments|
             billing_account.payments.each do |payment|
               payments << Extface::Driver::Base::Fiscal::SaleItem.new(price: payment.value.to_f, text1: payment.description)
             end
           end
-        )
-      end
+        ) if billing_account.instance_of?(Billing::Bill) && billing_account.valid?
+     
     end
   end
 end

@@ -75,15 +75,15 @@ module Extface
     end
     
     def period_report_session(from, to, detailed = true)
-      device.session("FP Report #{from.to_date.human} = #{to.to_date.human}") do |s|
+      device.session("FP Report #{from.to_date.human} - #{to.to_date.human} (#{ detailed ? 'detailed' : 'short' })") do |s|
         dates_bytes = "".b
-        dates_bytes << from.day
-        dates_bytes << from.month
-        dates_bytes << from.year - 2000
+        dates_bytes << pbcd(from.day)
+        dates_bytes << pbcd(from.month)
+        dates_bytes << pbcd(from.year - 2000)
         dates_bytes << 0
-        dates_bytes << to.day
-        dates_bytes << to.month
-        dates_bytes << to.year - 2000
+        dates_bytes << pbcd(to.day)
+        dates_bytes << pbcd(to.month)
+        dates_bytes << pbcd(to.year - 2000)
         dates_bytes << 0
         s.notify "FP Report Start"
         s.fsend detailed ? Reports::FP_DETAILED_DATES : Reports::FP_GENERAL_DATES, dates_bytes
@@ -266,6 +266,10 @@ module Extface
         errors.add :base, "No data received from device"
         return nil
       end
+    end
+    
+    def pbcd(byte)
+      ((byte / 10) << 4) | (byte % 10)
     end
     
     private
