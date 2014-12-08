@@ -47,14 +47,14 @@ module Extface
     def push(buffer)
       if @job
         #retry if current device job is not @job (waiting on queue)
-        wait_on_queue = 20 #stop me writing endless things
-        begin
-          if current_device_job = device.jobs(true).active.try(:first)
-            if current_device_job != @job
-              #wait_on_queue = 20 #FIXME!
-              p "#### current_job is not first_on_queue"
-            end
+        wait_on_queue = 2 #stop me writing endless things
+        if current_device_job = device.jobs(true).active.try(:first)
+          if current_device_job != @job
+            wait_on_queue = 20 #FIXME!
+            p "#### current_job is not first_on_queue"
           end
+        end
+        begin
           Timeout.timeout(Extface.device_timeout) do
             Extface.redis_block do |r|
               r.subscribe(@job.id) do |on| #blocking until delivered

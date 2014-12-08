@@ -3,6 +3,13 @@ require_dependency "extface/application_controller"
 module Extface
   class JobsController < ApplicationController
     include ActionController::Live
+    
+    skip_before_filter :include_extra_module
+    before_action :allow_cross_origin
+
+    def allow_cross_origin
+      headers['Access-Control-Allow-Origin'] = '*'
+    end
 
     def show
       response.headers['Content-Type'] = 'text/event-stream'
