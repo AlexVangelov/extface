@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.4.2a)
+    extface (0.4.3)
       rails (>= 4.0.5)
       redis
       redis-namespace
@@ -83,7 +83,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.3.2)
-    redis (3.1.0)
+    redis (3.2.0)
     redis-namespace (1.5.1)
       redis (~> 3.0, >= 3.0.4)
     sprockets (2.12.1)

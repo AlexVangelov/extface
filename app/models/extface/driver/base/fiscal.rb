@@ -72,6 +72,32 @@ module Extface
         raise "invalid qty" if qty.present? && !qty.kind_of(Float)
       end
     end
+    
+    def fiscalize(bill)
+        # sale_and_pay_items_session(
+          # [].tap() do |payments|
+            # bill.payments.each do |payment|
+              # payments << SaleItem.new(price: payment.value.to_f, text1: payment.description)
+            # end
+          # end
+        # ) if bill.kind_of?(Billing::Bill) && bill.valid?
+      device.session("Fiscal Doc") do |s|
+        s.notify "Fiscal Doc Start"
+        s.open_fiscal_doc
+        s.notify "Register Sale"
+        bill.charges.each do |charge|
+          #has charge modifier?
+          s.add_sale(SaleItem.new(price: charge.price.to_f, text1: charge.text))
+        end
+        #global modifier?
+        s.notify "Register Payment"
+        s.total_payment
+        #payments
+        s.notify "Close Fiscal Receipt"
+        s.close_fiscal_doc
+        s.notify "Fiscal Doc End"
+      end if bill.kind_of?(Billing::Bill) && bill.valid?
+    end
 
     private
       def raise_not_implemented
