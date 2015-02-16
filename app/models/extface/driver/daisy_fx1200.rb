@@ -122,7 +122,7 @@ module Extface
       raise "Not in fiscal session" unless @fiscal_session
     end
     
-    def add_payment(type_num)
+    def add_payment(value = nil, type_num = nil)
       raise "Not in fiscal session" unless @fiscal_session
     end
     

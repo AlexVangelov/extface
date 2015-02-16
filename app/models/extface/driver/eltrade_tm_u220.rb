@@ -144,7 +144,7 @@ module Extface
       send_comment text
     end
     
-    def add_payment(type_num = 0, value = nil) # 0, 1, 2, 3
+    def add_payment(value = nil, type_num = nil) # 0, 1, 2, 3
       raise "Not in fiscal session" unless @fiscal_session
       value_bytes = "\x00\x00\x00\x00" # recalculate
       unless value.nil?
@@ -152,7 +152,7 @@ module Extface
         value_bytes = "".b
         4.times{ |shift| value_bytes.insert 0, ((value_units >> shift*8) & 0xff).chr }
       end
-      fsend Receipt::PRINT_RECEIPT, "" << (9 + type_num).chr << value_bytes
+      fsend Receipt::PRINT_RECEIPT, "" << (9 + (type_num || 0)).chr << value_bytes
       status = get_printer_status
     end
     

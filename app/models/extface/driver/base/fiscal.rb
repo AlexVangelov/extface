@@ -44,7 +44,8 @@ module Extface
     def open_fiscal_doc(operator = '', password = '') raise_not_implemented end
     def add_sale(sale_item) raise_not_implemented end #instance of Extface::Driver::Base::Fiscal::SaleItem
     def add_comment(text = '') raise_not_implemented end
-    def add_payment(type_num, value = 0.00) raise_not_implemented end
+    def add_payment(value = nil, type_num = nil) raise_not_implemented end
+    def add_total_modifier(fixed_value = nil, percent_ratio = nil) raise_not_implemented end
     def total_payment() raise_not_implemented end #auto calculated total default payment
     def close_fiscal_doc() raise_not_implemented end
       
@@ -60,11 +61,11 @@ module Extface
       include ActiveModel::Validations
       attr_reader :price, # Float
                   :text1, :text2, # String
-                  :tax_group, #Float
+                  :tax_group, #Integer
                   :qty, #Fixnum
                   :percent, #Float
                   :neto, 
-                  :number #Fixnum
+                  :number #Fixnum (Eltrade PLU code)
       def initialize(attributes)
         @price, @text1, @text2, @tax_group, @qty, @percent, @neto, @number = attributes[:price], attributes[:text1].to_s, attributes[:text2].to_s, attributes[:tax_group], attributes[:qty], attributes[:percent], attributes[:neto], attributes[:number]
         raise "invalid price" unless price.kind_of?(Float)
@@ -86,13 +87,34 @@ module Extface
         s.open_fiscal_doc
         s.notify "Register Sale"
         bill.charges.each do |charge|
-          #has charge modifier?
-          s.add_sale(SaleItem.new(price: charge.price.to_f, text1: charge.text))
+          neto, percent_ratio = nil, nil, nil
+          if modifier = charge.modifier
+            neto = modifier.fixed_value
+            percent_ratio = modifier.percent_ratio unless neto.present?
+          end
+          if charge.price.zero? #printing comments with zero charges (TODO check zero charges allowed?)
+            s.add_comment charge.text
+          else
+            s.add_sale(
+              SaleItem.new(
+                price: charge.price.to_f, 
+                text1: charge.name,
+                text2: charge.description,
+                tax_group: charge.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
+                qty: charge.qty,
+                neto: neto,
+                percent_ratio: percent_ratio #TODO check format
+              )
+            )
+          end
         end
-        #global modifier?
+        if globa_modifier_value = bill.global_modifier_value
+          s.add_total_modifier globa_modifier_value.to_f 
+        end
         s.notify "Register Payment"
-        s.total_payment
-        #payments
+        bill.payments.each do |payment|
+          s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
+        end
         s.notify "Close Fiscal Receipt"
         s.close_fiscal_doc
         s.notify "Fiscal Doc End"
