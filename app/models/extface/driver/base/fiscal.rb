@@ -74,51 +74,67 @@ module Extface
       end
     end
     
-    def fiscalize(bill)
-        # sale_and_pay_items_session(
-          # [].tap() do |payments|
-            # bill.payments.each do |payment|
-              # payments << SaleItem.new(price: payment.value.to_f, text1: payment.description)
-            # end
-          # end
-        # ) if bill.kind_of?(Billing::Bill) && bill.valid?
-      device.session("Fiscal Doc") do |s|
-        s.notify "Fiscal Doc Start"
-        s.open_fiscal_doc
-        s.notify "Register Sale"
-        bill.charges.each do |charge|
-          neto, percent_ratio = nil, nil, nil
-          if modifier = charge.modifier
-            neto = modifier.fixed_value
-            percent_ratio = modifier.percent_ratio unless neto.present?
-          end
-          if charge.price.zero? #printing comments with zero charges (TODO check zero charges allowed?)
-            s.add_comment charge.text
-          else
-            s.add_sale(
-              SaleItem.new(
-                price: charge.price.to_f, 
-                text1: charge.name,
-                text2: charge.description,
-                tax_group: charge.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
-                qty: charge.qty,
-                neto: neto,
-                percent_ratio: percent_ratio #TODO check format
+    def fiscalize(bill, detailed = false)
+      return nil unless bill.kind_of?(Billing::Bill) && bill.valid?
+      if detailed
+        device.session("Fiscal Doc") do |s|
+          s.notify "Fiscal Doc Start"
+          s.open_fiscal_doc
+          s.notify "Register Sale"
+          bill.charges.each do |charge|
+            neto, percent_ratio = nil, nil, nil
+            if modifier = charge.modifier
+              neto = modifier.fixed_value
+              percent_ratio = modifier.percent_ratio unless neto.present?
+            end
+            if charge.price.zero? #printing comments with zero charges (TODO check zero charges allowed?)
+              s.add_comment charge.text
+            else
+              s.add_sale(
+                SaleItem.new(
+                  price: charge.price.to_f, 
+                  text1: charge.name,
+                  text2: charge.description,
+                  tax_group: charge.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
+                  qty: charge.qty,
+                  neto: neto,
+                  percent_ratio: percent_ratio #TODO check format
+                )
               )
-            )
+            end
           end
+          if globa_modifier_value = bill.global_modifier_value
+            s.add_total_modifier globa_modifier_value.to_f 
+          end
+          s.notify "Register Payment"
+          bill.payments.each do |payment|
+            s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
+          end
+          s.notify "Close Fiscal Receipt"
+          s.close_fiscal_doc
+          s.notify "Fiscal Doc End"
         end
-        if globa_modifier_value = bill.global_modifier_value
-          s.add_total_modifier globa_modifier_value.to_f 
+      else #not detailed
+        device.session("Fiscal Doc") do |s|
+          s.notify "Fiscal Doc Start"
+          s.open_fiscal_doc
+          s.notify "Register Sale"
+          s.add_sale(
+            SaleItem.new(
+              price: bill.payments_sum.to_f, 
+              text1: bill.name,
+              tax_group: bill.charges.first.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
+            )
+          )
+          s.notify "Register Payment"
+          bill.payments.each do |payment|
+            s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
+          end
+          s.notify "Close Fiscal Receipt"
+          s.close_fiscal_doc
+          s.notify "Fiscal Doc End"
         end
-        s.notify "Register Payment"
-        bill.payments.each do |payment|
-          s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
-        end
-        s.notify "Close Fiscal Receipt"
-        s.close_fiscal_doc
-        s.notify "Fiscal Doc End"
-      end if bill.kind_of?(Billing::Bill) && bill.valid?
+      end
     end
 
     private
