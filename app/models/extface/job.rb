@@ -1,5 +1,7 @@
 module Extface
   class Job < ActiveRecord::Base
+    attr_accessor :thread
+    
     belongs_to :device, inverse_of: :jobs
     
     scope :active, ->{ where(arel_table[:completed_at].eq(nil).and(arel_table[:failed_at].eq(nil))) }

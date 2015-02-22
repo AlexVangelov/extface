@@ -33,7 +33,7 @@ module Extface
 
     def session(description = nil)
       job = jobs.create!(description: description)
-      Thread.new do
+      job.thread = Thread.new do
         begin
           raise 'No driver configured' unless driver.present?
           if driver.set_job(job)
@@ -49,7 +49,7 @@ module Extface
           end
           job.failed! e.message
         ensure
-          ActiveRecord::Base.connection.close
+          ActiveRecord::Base.connection.close #unless other threads
         end
       end
       job

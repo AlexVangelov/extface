@@ -103,8 +103,9 @@ module Extface
               )
             end
           end
-          if globa_modifier_value = bill.global_modifier_value
-            s.add_total_modifier globa_modifier_value.to_f 
+          if global_modifier_value = bill.global_modifier_value
+            s.notify "Register Global Modifier"
+            s.add_total_modifier global_modifier_value.to_f 
           end
           s.notify "Register Payment"
           bill.payments.each do |payment|
@@ -126,6 +127,10 @@ module Extface
               tax_group: bill.charges.first.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
             )
           )
+          if global_modifier_value = bill.global_modifier_value
+            s.notify "Register Global Modifier"
+            s.add_total_modifier global_modifier_value.to_f 
+          end
           s.notify "Register Payment"
           bill.payments.each do |payment|
             s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
