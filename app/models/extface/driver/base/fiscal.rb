@@ -76,10 +76,11 @@ module Extface
     
     def fiscalize(bill, detailed = false)
       return nil unless bill.kind_of?(Billing::Bill) && bill.valid?
+      operator_mapping = bill.find_operator_mapping_for(self)
       if detailed
         device.session("Fiscal Doc") do |s|
           s.notify "Fiscal Doc Start"
-          s.open_fiscal_doc
+          s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
           bill.charges.each do |charge|
             neto, percent_ratio = nil, nil, nil
@@ -118,7 +119,7 @@ module Extface
       else #not detailed
         device.session("Fiscal Doc") do |s|
           s.notify "Fiscal Doc Start"
-          s.open_fiscal_doc
+          s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
           s.add_sale(
             SaleItem.new(
