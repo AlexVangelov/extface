@@ -35,6 +35,7 @@ module Extface
       job = jobs.create!(description: description)
       job.thread = Thread.new do
         Thread.current[:extface_job] = job.id
+        ActiveRecord::Base.establish_connection unless ActiveRecord::Base.connection.active?
         begin
           raise 'No driver configured' unless driver.present?
           if driver.set_job(job)

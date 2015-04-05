@@ -20,6 +20,7 @@ module Extface
     
     def connected!
       unless connected?
+        p "device connected at #{Time.now}"
         self.connected_at = Time.now
         save!
         notify("Job #{self.id} device connected!")
