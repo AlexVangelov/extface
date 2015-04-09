@@ -135,7 +135,7 @@ module Extface
       fsend(Sales::TOTAL, "".tap() do |data|
                             data << "\t"
                             data << PAYMENT_TYPE_MAP[type_num] unless type_num.blank?
-                            data << item.price.to_s
+                            data << value.to_s unless value.nil?
                           end
       )
     end
