@@ -30,6 +30,14 @@ module Extface
       8 => "\xc7"
     }
     
+    PAYMENT_TYPE_MAP = {
+      1 => "P",
+      2 => "N",
+      3 => "C",
+      4 => "D",
+      5 => "B"
+    }
+    
     has_serial_config
     
     include Extface::Driver::Daisy::CommandsFx1200
@@ -124,6 +132,12 @@ module Extface
     
     def add_payment(value = nil, type_num = nil)
       raise "Not in fiscal session" unless @fiscal_session
+      fsend(Sales::TOTAL, "".tap() do |data|
+                            data << "\t"
+                            data << PAYMENT_TYPE_MAP[type_num] unless type_num.blank?
+                            data << item.price.to_s
+                          end
+      )
     end
     
     def total_payment
