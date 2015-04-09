@@ -133,9 +133,10 @@ module Extface
             s.add_total_modifier global_modifier_value.to_f 
           end
           s.notify "Register Payment"
-          bill.payments.each do |payment|
-            s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
-          end
+          # bill.payments.each do |payment|
+            # s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)
+          # end
+          s.total_payment #TODO fix payment and remove me
           s.notify "Close Fiscal Receipt"
           s.close_fiscal_doc
           s.notify "Fiscal Doc End"
