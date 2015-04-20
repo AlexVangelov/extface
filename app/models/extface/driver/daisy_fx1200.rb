@@ -132,12 +132,13 @@ module Extface
     
     def add_payment(value = nil, type_num = nil)
       raise "Not in fiscal session" unless @fiscal_session
-      fsend(Sales::TOTAL, "".tap() do |data|
+      payment_data = "".tap() do |data|
                             data << "\t"
-                            data << PAYMENT_TYPE_MAP[type_num] unless type_num.blank?
-                            data << value.to_s unless value.blank?
+                            data << PAYMENT_TYPE_MAP[type_num || 1] #by documentation this data can be ommitted, but got vrong value error
+                            data << ("%.2f" % value) unless value.blank?
                           end
-      )
+      p "PPPPPPPPPPPPPP payment_data: #{payment_data}"
+      fsend(Sales::TOTAL, payment_data)
     end
     
     def total_payment
@@ -252,7 +253,7 @@ module Extface
           data << "\x0a#{text2}" unless item.text2.blank?
           data << "\t"
           data << TAX_GROUPS_MAP[item.tax_group || 2]
-          data << item.price.to_s
+          data << ("%.2f" % item.price)
           data << "*#{item.qty.to_s}" unless item.qty.blank?
           data << ",#{item.percent}" unless item.percent.blank?
           data << "$#{neto}" unless item.neto.blank?

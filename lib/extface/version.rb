@@ -1,3 +1,3 @@
 module Extface
-  VERSION = "0.4.3d"
+  VERSION = "0.4.3g"
 end
