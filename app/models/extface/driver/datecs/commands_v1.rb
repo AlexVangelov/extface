@@ -24,7 +24,8 @@ module Extface
     end
     
     module Printer
-      PAPER_CUT                   = 0x00
+      PAPER_MOVE                  = 0x2C
+      PAPER_CUT                   = 0x2D
     end
   end
 end

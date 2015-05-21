@@ -1,3 +1,6 @@
+## 0.4.5
+  - Datect FP550 layer. Paper cut.
+  
 ## 0.4.2
   - Eltrade fiscal report for period
 

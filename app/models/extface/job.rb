@@ -20,9 +20,8 @@ module Extface
     
     def connected!
       unless connected?
-        p "device connected at #{Time.now}"
         self.connected_at = Time.now
-        save!
+        save! unless Rails.env.test?
         notify("Job #{self.id} device connected!")
       end
     end

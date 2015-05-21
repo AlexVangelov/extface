@@ -13,7 +13,7 @@ two:
   driver: star_scp700
 
 datecs_fp550:
-  uuid: datect_fp550
+  uuid: datecs_fp550
   name: Datect FP550
   extfaceable: one(Shop)
   driver: datecs_fp550

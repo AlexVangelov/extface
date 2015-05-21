@@ -45,5 +45,57 @@ module Extface
       assert_equal false, frame.valid?
       assert frame.errors.messages[:len]
     end
+    
+    test "fsend" do
+      job = extface_jobs(:one)
+      job_thread = Thread.new do
+        @driver.set_job(job)
+        result = @driver.fsend(0x2C) # paper move command
+      end
+      simulate_device_pull(job)
+      @driver.handle("\x01\x2C\x2F\x2D\x50\x04\x88\x80\xC0\x80\x80\xB0\x05\x30\x34\x35\x39\x03".b)
+      simulate_device_pull(job)
+      @driver.handle("\x01\x2C\x2F\x2D\x50\x04\x88\x80\xC0\x80\x80\xB0\x05\x30\x34\x35\x39\x03".b)
+      job_thread.join
+      assert @driver.errors.empty?
+    end
   end
 end
+
+=begin
+1432096828.834384 "del" "extface:d29183a38460cc33dfdfc2a38c20eb7d"
+1432096828.835035 "del" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5"
+1432096828.912680 "subscribe" "extface:354"
+1432096828.916584 "rpush" "extface:354" "\x01% JX\x0500><\x03"
+1432096834.022511 "blpop" "extface:354" "1"
+1432096834.025004 "publish" "extface:354" "OK"
+1432096834.025467 "unsubscribe"
+1432096834.025726 "blpop" "extface:354" "1"
+1432096834.026166 "publish" "extface:354" "OK"
+1432096834.026509 "blpop" "extface:354" "1"
+1432096834.122677 "publish" "extface:354" "Job 354 device connected!"
+1432096834.124782 "blpop" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5" "3"
+1432096834.155940 "append" "extface:d29183a38460cc33dfdfc2a38c20eb7d" "\x01+ J\x04\x80\x80\x92\x8f\x80\xb2\x0503?1\x03"
+1432096834.255090 "get" "extface:d29183a38460cc33dfdfc2a38c20eb7d"
+1432096834.259587 "rpush" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5" "\x01+ J\x04\x80\x80\x92\x8f\x80\xb2\x0503?1\x03"
+1432096834.261451 "set" "extface:d29183a38460cc33dfdfc2a38c20eb7d" ""
+1432096834.287925 "subscribe" "extface:354"
+1432096834.288641 "rpush" "extface:354" "\x01$!-\x050077\x03"
+1432096834.289568 "publish" "extface:354" "OK"
+1432096834.289927 "blpop" "extface:354" "1"
+1432096834.290075 "unsubscribe"
+1432096834.303192 "publish" "extface:354" "Job 354 completed!"
+1432096834.381481 "append" "extface:d29183a38460cc33dfdfc2a38c20eb7d" "\x16"
+1432096834.381674 "get" "extface:d29183a38460cc33dfdfc2a38c20eb7d"
+1432096834.384880 "rpush" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5" "\x16"
+1432096834.385729 "set" "extface:d29183a38460cc33dfdfc2a38c20eb7d" ""
+1432096834.695593 "append" "extface:d29183a38460cc33dfdfc2a38c20eb7d" "\x16"
+1432096834.696066 "get" "extface:d29183a38460cc33dfdfc2a38c20eb7d"
+1432096834.721265 "rpush" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5" "\x16"
+1432096834.722383 "set" "extface:d29183a38460cc33dfdfc2a38c20eb7d" ""
+1432096835.041215 "append" "extface:d29183a38460cc33dfdfc2a38c20eb7d" "\x16\x16\x16\x16\x01,!-F\x04\x80\x80\x92\x8f\x80\xb2\x05041<\x03"
+1432096835.041828 "get" "extface:d29183a38460cc33dfdfc2a38c20eb7d"
+1432096835.073717 "rpush" "extface:d29183a38460cc33dfdfc2a38c20eb7d:5" "\x16"
+1432096835.075013 "set" "extface:d29183a38460cc33dfdfc2a38c20eb7d" "\x16\x16\x16\x01,!-F\x04\x80\x80\x92\x8f\x80\xb2\x05041<\x03"
+
+=end

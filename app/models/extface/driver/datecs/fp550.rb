@@ -1,6 +1,11 @@
 module Extface
   class Driver::Datecs::Fp550 < Extface::Driver::Base::Fiscal
     NAME = 'Datecs FP550 (Serial)'.freeze
+    
+    RESPONSE_TIMEOUT = 3  #seconds
+    INVALID_FRAME_RETRIES = 6  #count (bad length, bad checksum)
+    ACKS_MAX_WAIT = 60 #count / nothing is forever
+    NAKS_MAX_COUNT = 3 #count
 
     include Extface::Driver::Datecs::CommandsV1
 
@@ -19,14 +24,49 @@ module Extface
     
     def fsend(cmd, data = "") #return data or nil
       packet_data = build_packet(cmd, data) #store packet to be able to re-transmit it with the same sequence number
+      result = false
       invalid_frames = 0 #counter for bad responses
       nak_messages = 0 #counter for rejected packets (should re-transmit the packet)
       push packet_data #send packet
-      begin
-        errors.clear #start with slate clean
+      ACKS_MAX_WAIT.times do |retries|
+        errors.clear
         if resp = frecv(RESPONSE_TIMEOUT)
-          
+          if resp.valid?
+            human_status_errors(resp.status)
+            if errors.empty?
+              result = resp.data
+              break
+            else
+              raise errors.full_messages.join(',')
+            end
+          else #ack, nak or bad
+            if resp.nak?
+              nak_messages += 1
+              if nak_messages > NAKS_MAX_COUNT
+                errors.add :base, "#{NAKS_MAX_COUNT} NAKs Received. Abort!"
+                break
+              end
+            elsif !resp.ack?
+              invalid_frames += 1
+              if nak_messages > INVALID_FRAME_RETRIES
+                errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
+                break
+              end
+            end
+            push packet_data unless resp.ack?
+          end
         end
+        errors.add :base, "#{ACKS_MAX_WAIT} ACKs Received. Abort!"
+      end
+      return result
+    end
+    
+    def frecv(timeout) # return RespFrame or nil
+      if frame_bytes = pull(timeout)
+        return Frame.new(frame_bytes.b)
+      else
+        errors.add :base, "No data received from device"
+        return nil
       end
     end
     

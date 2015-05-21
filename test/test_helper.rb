@@ -19,6 +19,10 @@ class ActiveSupport::TestCase
   load "#{Rails.root}/db/schema.rb"
   
   fixtures :all
+  
+  def simulate_device_pull(job)
+    Extface.redis_block{ |r| sleep 1; r.publish(job.id, "OK") } #simulate send to device
+  end
 end
 module Extface
   class ActionController::TestCase
