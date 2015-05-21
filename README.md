@@ -113,3 +113,4 @@ Views as designed for twitter bootstrap CSS. Engine layout can be replaced by cr
 ## Driver writing guide
 
 [http://alexvangelov.wordpress.com/2014/08/14/extface-driver-writing-guide-ruby](http://alexvangelov.wordpress.com/2014/08/14/extface-driver-writing-guide-ruby/)
+[https://alexvangelov.wordpress.com/2015/05/21/extface-driver-writing-guide-2](https://alexvangelov.wordpress.com/2015/05/21/extface-driver-writing-guide-2)
