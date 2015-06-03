@@ -16,12 +16,129 @@ module Extface
       end
     end
     
+    #tests
+    def non_fiscal_test
+      device.session("Non Fiscal Text") do |s|
+        s.notify "Printing Non Fiscal Text"
+        s.open_non_fiscal_doc
+        s.print "********************************"
+        s.print "Extface Print Test".center(32)
+        s.print "********************************"
+        s.fsend Printer::PAPER_MOVE, "1"
+        s.print "Driver: " + "#{self.class::NAME}".truncate(24)
+        s.close_non_fiscal_doc
+        s.notify "Printing finished"
+      end
+    end
+    
+    def fiscal_test
+      sale_and_pay_items_session([
+        SaleItem.new( price: 0.01, text1: "Extface Test" )
+      ])
+    end
+    
+    #reports
+    def z_report_session
+      device.session("Z Report") do |s|
+        s.notify "Z Report Start"
+        s.fsend Closure::DAY_FIN_REPORT, "0"
+        s.notify "Z Report End"
+      end
+    end
+    
+    def x_report_session
+      device.session("X Report") do |s|
+        s.notify "X Report Start"
+        s.fsend Closure::DAY_FIN_REPORT, "2"
+        s.notify "X Report End"
+      end
+    end
+    
+    #print
+    def open_non_fiscal_doc
+      fsend Sales::START_NON_FISCAL_DOC
+      @print_session = true
+    end
+    
+    def print(text) #up to 38 sybols, TODO check
+      raise "Not in print session" unless @print_session
+      fsend Sales::PRINT_NON_FISCAL_TEXT, text
+    end
+    
+    def close_non_fiscal_doc
+      fsend Sales::END_NON_FISCAL_DOC
+      @print_session = false
+    end
+    
     def check_status
       flush #clear receive buffer
       fsend(Info::GET_STATUS, 'X') # get 6 bytes status
       errors.empty?
     end
     
+    #fiscal
+    def open_fiscal_doc(operator = "1", password = "1")
+      fsend Sales::START_FISCAL_DOC, "#{operator.presence || "1"},#{password.presence || "1"},00001"
+      @fiscal_session = true
+    end
+    
+    def close_fiscal_doc
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend Sales::END_FISCAL_DOC
+      @fiscal_session = false
+    end
+    
+    def add_sale(sale_item)
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend Sales::SALE_AND_SHOW, build_sale_data(sale_item)
+    end
+    
+    def add_comment(text)
+      raise "Not in fiscal session" unless @fiscal_session
+    end
+    
+    def add_payment(value = nil, type_num = nil)
+      raise "Not in fiscal session" unless @fiscal_session
+      payment_data = "".tap() do |data|
+                            data << "\t"
+                            data << PAYMENT_TYPE_MAP[type_num || 1]
+                            data << ("%.2f" % value) unless value.blank?
+                          end
+      fsend(Sales::TOTAL, payment_data)
+    end
+    
+    def total_payment
+      raise "Not in fiscal session" unless @fiscal_session
+      fsend(Sales::TOTAL, "\t")
+    end
+    
+    #basket
+    def sale_and_pay_items_session(items = [], operator = "1", password = "1")
+      device.session("Fiscal Doc") do |s|
+        s.notify "Fiscal Doc Start"
+        s.open_fiscal_doc
+        s.notify "Register Sale"
+        items.each do |item|
+          s.add_sale(item)
+        end
+        s.notify "Register Payment"
+        s.total_payment
+        s.notify "Close Fiscal Receipt"
+        s.close_fiscal_doc
+        s.notify "Fiscal Doc End"
+      end
+    end
+    
+    def cancel_doc_session
+      device.session("Doc cancel") do |s|
+        s.notify "Doc Cancel Start"
+        s.fsend Sales::CANCEL_DOC
+        s.paper_cut
+        s.notify "Doc Cancel End"
+      end
+    end
+    
+    #common
     def fsend(cmd, data = "") #return data or nil
       packet_data = build_packet(cmd, data) #store packet to be able to re-transmit it with the same sequence number
       result = false

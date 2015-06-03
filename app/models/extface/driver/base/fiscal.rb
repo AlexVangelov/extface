@@ -48,8 +48,6 @@ module Extface
     def add_total_modifier(fixed_value = nil, percent_ratio = nil) raise_not_implemented end
     def total_payment() raise_not_implemented end #auto calculated total default payment
     def close_fiscal_doc() raise_not_implemented end
-      
-    def cancel_doc_session() raise_not_implemented end #repair from broken doc session
     
     #fiscal basket session of Extface::Driver::Base::Fiscal::SaleItem instances
     def sale_and_pay_items_session(sale_items = [], operator = '', password = '') raise_not_implemented end

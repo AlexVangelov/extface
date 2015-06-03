@@ -90,8 +90,8 @@ module Extface
       end
     end
     
-    def period_report_session(from, to, detailed = true)
-    end
+    # def period_report_session(from, to, detailed = true)
+    # end
     
     #print
     def open_non_fiscal_doc

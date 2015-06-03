@@ -27,5 +27,43 @@ module Extface
       PAPER_MOVE                  = 0x2C
       PAPER_CUT                   = 0x2D
     end
+    
+    module Sales
+      START_NON_FISCAL_DOC  = 0x26  #other
+      END_NON_FISCAL_DOC    = 0x27  #other
+      PRINT_NON_FISCAL_TEXT = 0x2a  #other
+      START_FISCAL_DOC      = 0x30
+      SALE                  = 0x31
+      SUBTOTAL              = 0x33
+      SALE_AND_SHOW         = 0x34
+      TOTAL                 = 0x35
+      PRINT_FISCAL_TEXT     = 0x36
+      END_FISCAL_DOC        = 0x38
+      PRINT_INFO_FOR_CLIENT = 0x39
+      SALE_ITEM             = 0x3a
+      CANCEL_FISCAL_DOC     = 0x3c
+      PRINT_BARCODE         = 0x54
+      PRINT_DUPLICATE_DOC   = 0x6d
+    end
+    
+    module Reports
+      REPORT_FP_BY_NUMBER         = 0x49
+      COMPACT_REPORT_FP_BY_DATE   = 0x4f
+      REPORT_FP_BY_DATE           = 0x5e
+      COMPACT_REPORT_FP_BY_NUM    = 0x5f
+      REPORT_BY_OPERATORS         = 0x69
+      REPORT_BY_ITEMS             = 0x6F
+    end
+    
+    module Closure
+      DAY_FIN_REPORT                    = 0x45
+      EXPANDED_DAY_FIN_REPORT           = 0x6c
+      EXPANDED_DAY_FIN_REPORT_BY_DEPS   = 0x75
+      EXPANDED_DAY_FIN_REPORT_BY_ITEMS  = 0x76
+    end
+    
+    module Other
+      PAYED_RECV_ACCOUNT  = 0x46
+    end
   end
 end
