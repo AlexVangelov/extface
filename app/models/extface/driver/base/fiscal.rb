@@ -119,17 +119,24 @@ module Extface
           s.notify "Fiscal Doc Start"
           s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
+          total_modifier = nil
+          if global_modifier_value = bill.global_modifier_value
+            s.notify "Register Global Modifier"
+            total_modifier = global_modifier_value.to_f 
+          end
           s.add_sale(
             SaleItem.new(
               price: bill.payments_sum.to_f, 
-              text1: bill.name,
+              #text1: bill.name,
+              text1: '',
               tax_group: bill.charges.first.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
+              neto: total_modifier
             )
           )
-          if global_modifier_value = bill.global_modifier_value
-            s.notify "Register Global Modifier"
-            s.add_total_modifier global_modifier_value.to_f 
-          end
+          # if global_modifier_value = bill.global_modifier_value
+            # s.notify "Register Global Modifier"
+            # s.add_total_modifier global_modifier_value.to_f 
+          # end
           s.notify "Register Payment"
           bill.payments.each do |payment|
             s.add_payment payment.value.to_f, payment.find_payment_type_mapping_for(self)

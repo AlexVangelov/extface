@@ -10,7 +10,8 @@ module Extface
     include Extface::Driver::Datecs::CommandsV1
 
     def handle(buffer)
-      if i = buffer.index(/[\x03\x16\x15]/)   # find position of frame possible delimiter
+      #if i = buffer.index(/[\x03\x16\x15]/)   # find position of frame possible delimiter
+      if i = buffer.index("\x03") || buffer.index("\x16") || buffer.index("\x15")
         rpush buffer[0..i]                    # this will make data available for #pull(timeout) method
         return i+1                            # return number of bytes processed
       end
@@ -132,7 +133,7 @@ module Extface
     def cancel_doc_session
       device.session("Doc cancel") do |s|
         s.notify "Doc Cancel Start"
-        s.fsend Sales::CANCEL_DOC
+        s.fsend Sales::CANCEL_FISCAL_DOC
         s.paper_cut
         s.notify "Doc Cancel End"
       end
@@ -165,7 +166,7 @@ module Extface
               end
             elsif !resp.ack?
               invalid_frames += 1
-              if nak_messages > INVALID_FRAME_RETRIES
+              if invalid_frames > INVALID_FRAME_RETRIES
                 errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
                 break
               end
@@ -211,8 +212,10 @@ module Extface
       errors.add :base, "Fiscal Device General Error" unless (status_0 & 0x20).zero?
       errors.add :base, "Invalid Command" unless (status_0 & 0x02).zero?
       errors.add :base, "Date & Time Not Set" unless (status_0 & 0x04).zero?
-      errors.add :base, "Syntax Error" unless (status_0 & 0x02).zero?
+      errors.add :base, "Syntax Error" unless (status_0 & 0x01).zero?
       status_1 = status[1].ord
+      errors.add :base, "Unpermitted Command In This Mode" unless (status_1 & 0x02).zero?
+      errors.add :base, "Field Overflow" unless (status_1 & 0x01).zero?
     end
     
     private
@@ -228,7 +231,7 @@ module Extface
         include ActiveModel::Validations
         attr_reader :frame, :len, :seq, :cmd, :data, :status, :bcc
         
-        validates_presence_of :frame, unless: :unpacked?
+        validates_presence_of :frame#, unless: :unpacked?
         validate :bcc_validation
         validate :len_validation
         
@@ -250,6 +253,19 @@ module Extface
         def nak?; !!@nak; end #should retry command with same seq
         
         private
+          def build_sale_data(item)
+            "".tap() do |data|
+              data << item.text1 unless item.text1.blank?
+              data << "\x0a#{text2}" unless item.text2.blank?
+              data << "\t"
+              data << TAX_GROUPS_MAP[item.tax_group || 2]
+              data << ("%.2f" % item.price)
+              data << "*#{item.qty.to_s}" unless item.qty.blank?
+              data << ",#{item.percent}" unless item.percent.blank?
+              data << "$#{'%.2f' % item.neto}" unless item.neto.blank?
+            end
+          end
+
           def unpacked? # is it packed or unpacked message?
             @ack || @nak
           end

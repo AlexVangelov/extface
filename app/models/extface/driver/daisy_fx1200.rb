@@ -224,7 +224,7 @@ module Extface
               end
             elsif !resp.ack?
               invalid_frames += 1
-              if nak_messages > INVALID_FRAME_RETRIES
+              if invalid_frames > INVALID_FRAME_RETRIES
                 errors.add :base, "#{INVALID_FRAME_RETRIES} Broken Packets Received. Abort!"
                 break
               end
@@ -256,7 +256,7 @@ module Extface
           data << ("%.2f" % item.price)
           data << "*#{item.qty.to_s}" unless item.qty.blank?
           data << ",#{item.percent}" unless item.percent.blank?
-          data << "$#{neto}" unless item.neto.blank?
+          data << "$#{'%.2f' % item.neto}" unless item.neto.blank?
         end
       end
     
@@ -283,7 +283,7 @@ module Extface
         errors.add :base, "Fiscal Device General Error" unless (status[0].ord & 0x20).zero?
         errors.add :base, "Invalid Command" unless (status[0].ord & 0x02).zero?
         errors.add :base, "Date & Time Not Set" unless (status[0].ord & 0x04).zero?
-        errors.add :base, "Syntax Error" unless (status[0].ord & 0x02).zero?
+        errors.add :base, "Syntax Error" unless (status[0].ord & 0x01).zero?
         
         errors.add :base, "Wrong Password" unless (status[1].ord & 0x40).zero?
         errors.add :base, "Cutter Error" unless (status[1].ord & 0x20).zero?
