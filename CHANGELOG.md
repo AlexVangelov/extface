@@ -1,3 +1,6 @@
+## 0.4.7
+  - Datecs FP550 go alive.
+  - Daisy FX1200 full errors collection.
 ## 0.4.5
   - Datect FP550 layer. Paper cut.
   

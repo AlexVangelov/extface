@@ -6,6 +6,25 @@ module Extface
     INVALID_FRAME_RETRIES = 6  #count (bad length, bad checksum)
     ACKS_MAX_WAIT = 60 #count / nothing is forever
     NAKS_MAX_COUNT = 3 #count
+    
+    TAX_GROUPS_MAP = {
+      1 => "\xc0",
+      2 => "\xc1",
+      3 => "\xc2",
+      4 => "\xc3",
+      5 => "\xc4",
+      6 => "\xc5",
+      7 => "\xc6",
+      8 => "\xc7"
+    }
+    
+    PAYMENT_TYPE_MAP = {
+      1 => "P",
+      2 => "N",
+      3 => "C",
+      4 => "D",
+      5 => "B"
+    }
 
     include Extface::Driver::Datecs::CommandsV1
 
@@ -78,8 +97,8 @@ module Extface
     end
     
     #fiscal
-    def open_fiscal_doc(operator = "1", password = "1")
-      fsend Sales::START_FISCAL_DOC, "#{operator.presence || "1"},#{password.presence || "1"},00001"
+    def open_fiscal_doc(operator = "1", password = "000000")
+      fsend Sales::START_FISCAL_DOC, "#{operator.presence || "1"},#{password.presence || "000000"},00001"
       @fiscal_session = true
     end
     
@@ -219,6 +238,18 @@ module Extface
     end
     
     private
+      def build_sale_data(item)
+        "".tap() do |data|
+          data << item.text1 unless item.text1.blank?
+          data << "\x0a#{text2}" unless item.text2.blank?
+          data << "\t"
+          data << TAX_GROUPS_MAP[item.tax_group || 2]
+          data << ("%.2f" % item.price)
+          data << "*#{item.qty.to_s}" unless item.qty.blank?
+          data << ",#{item.percent}" unless item.percent.blank?
+          data << ",;#{'%.2f' % item.neto}" unless item.neto.blank?
+        end
+      end
       
       def sequence_number
         @seq ||= 0x1f
@@ -253,18 +284,6 @@ module Extface
         def nak?; !!@nak; end #should retry command with same seq
         
         private
-          def build_sale_data(item)
-            "".tap() do |data|
-              data << item.text1 unless item.text1.blank?
-              data << "\x0a#{text2}" unless item.text2.blank?
-              data << "\t"
-              data << TAX_GROUPS_MAP[item.tax_group || 2]
-              data << ("%.2f" % item.price)
-              data << "*#{item.qty.to_s}" unless item.qty.blank?
-              data << ",#{item.percent}" unless item.percent.blank?
-              data << "$#{'%.2f' % item.neto}" unless item.neto.blank?
-            end
-          end
 
           def unpacked? # is it packed or unpacked message?
             @ack || @nak

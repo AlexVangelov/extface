@@ -119,11 +119,11 @@ module Extface
           s.notify "Fiscal Doc Start"
           s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
-          total_modifier = nil
-          if global_modifier_value = bill.global_modifier_value
-            s.notify "Register Global Modifier"
-            total_modifier = global_modifier_value.to_f 
-          end
+          total_modifier = nil # send payments sum, so modifier make no sence! think
+          # if global_modifier_value = bill.global_modifier_value
+            # s.notify "Register Global Modifier"
+            # total_modifier = global_modifier_value.to_f 
+          # end
           s.add_sale(
             SaleItem.new(
               price: bill.payments_sum.to_f, 

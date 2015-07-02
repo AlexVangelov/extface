@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.4.6b)
+    extface (0.4.7)
       rails (>= 4.0.5)
       redis
       redis-namespace
