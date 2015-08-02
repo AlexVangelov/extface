@@ -67,7 +67,7 @@ module Extface
       def initialize(attributes)
         @price, @text1, @text2, @tax_group, @qty, @percent, @neto, @number = attributes[:price], attributes[:text1].to_s, attributes[:text2].to_s, attributes[:tax_group], attributes[:qty], attributes[:percent], attributes[:neto], attributes[:number]
         raise "invalid price" unless price.kind_of?(Float)
-        raise "invalid tax group" if tax_group.present? && !tax_group.kind_of(Integer)
+        raise "invalid tax group" if tax_group.present? && !tax_group.kind_of?(Fixnum)
         raise "invalid qty" if qty.present? && !qty.kind_of(Float)
       end
     end

@@ -66,7 +66,7 @@ module Extface
     end
     
     def x_report_session
-      device.session("Z Report") do |s|
+      device.session("X Report") do |s|
         s.notify "X Report Start"
         s.fsend Reports::DAILY_REPORT, FLAG_FALSE
         status = s.get_printer_status
