@@ -74,6 +74,14 @@ module Extface
       end
     end
     
+    def period_report_session(from, to, detailed = true)
+      device.session("Period Report #{ '(detailed)' if detailed }") do |s|
+        s.notify "Period Report Start #{ '(detailed)' if detailed }"
+        s.fsend detailed ? Reports::REPORT_FP_BY_DATE : Reports::COMPACT_REPORT_FP_BY_DATE, "#{from.strftime('%d%m%y')},#{to.strftime('%d%m%y')}"
+        s.notify "Period Report End"
+      end
+    end
+    
     #print
     def open_non_fiscal_doc
       fsend Sales::START_NON_FISCAL_DOC
