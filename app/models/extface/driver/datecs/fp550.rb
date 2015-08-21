@@ -6,6 +6,7 @@ module Extface
     INVALID_FRAME_RETRIES = 6  #count (bad length, bad checksum)
     ACKS_MAX_WAIT = 60 #count / nothing is forever
     NAKS_MAX_COUNT = 3 #count
+    BAD_SEQ_MAX_COUNT = 3
     
     TAX_GROUPS_MAP = {
       1 => "\xc0",
@@ -206,13 +207,24 @@ module Extface
       return result
     end
     
-    def frecv(timeout) # return RespFrame or nil
-      if frame_bytes = pull(timeout)
-        return Frame.new(frame_bytes.b)
-      else
-        errors.add :base, "No data received from device"
-        return nil
+    def frecv(timeout) # return Frame or nil
+      rframe = nil
+      BAD_SEQ_MAX_COUNT.times do
+        if frame_bytes = pull(timeout)
+          rframe = Frame.new(frame_bytes.b)
+          if rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
+            break
+          else
+            errors.add :base, "Sequence mismatch"
+            p "Invalid sequence (expected: #{sequence_number(false).to_s(16)}, got: #{rframe.seq.ord.to_s(16)})"
+            rframe = nil #invalidate mismatch sequence frame for the last retry
+          end
+        else
+          errors.add :base, "No data received from device"
+          break
+        end
       end
+      return rframe
     end
     
     def build_packet(cmd, data = "")
@@ -259,9 +271,9 @@ module Extface
         end
       end
       
-      def sequence_number
+      def sequence_number(increment = true)
         @seq ||= 0x1f
-        @seq += 1
+        @seq += 1 if increment
         @seq = 0x1f if @seq == 0x7f
         @seq
       end

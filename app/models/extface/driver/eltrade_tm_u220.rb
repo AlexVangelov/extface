@@ -11,6 +11,7 @@ module Extface
     RESPONSE_TIMEOUT = 3  #seconds
     INVALID_FRAME_RETRIES = 6  #count
     BUSY_MAX_WAIT_CYCLES = 60  #count
+    BAD_SEQ_MAX_COUNT = 3
     
     FLAG_TRUE = "\xff\xff"
     FLAG_FALSE = "\x00\x00"
@@ -260,12 +261,22 @@ module Extface
     end
     
     def frecv(timeout) # return RespFrame or nil
-      if frame_bytes = pull(timeout)
-        return Frame.new(frame_bytes.b)
-      else
-        errors.add :base, "No data received from device"
-        return nil
+      rframe = nil
+      BAD_SEQ_MAX_COUNT.times do
+        if frame_bytes = pull(timeout)
+          rframe = Frame.new(frame_bytes.b)
+          if rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
+            break
+          else
+            errors.add :base, "Sequence mismatch"
+            rframe = nil #invalidate mismatch sequence frame for the last retry
+          end
+        else
+          errors.add :base, "No data received from device"
+          break
+        end
       end
+      return rframe
     end
     
     def pbcd(byte)
