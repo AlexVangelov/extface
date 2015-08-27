@@ -212,7 +212,7 @@ module Extface
       BAD_SEQ_MAX_COUNT.times do
         if frame_bytes = pull(timeout)
           rframe = Frame.new(frame_bytes.b)
-          if rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
+          if rframe.seq.nil? || rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
             break
           else
             errors.add :base, "Sequence mismatch"
