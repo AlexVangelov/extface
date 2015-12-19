@@ -19,6 +19,7 @@ module Extface
     ACKS_MAX_WAIT = 60 #count / nothing is forever
     NAKS_MAX_COUNT = 3 #count
     BAD_SEQ_MAX_COUNT = 3
+    NO_RESP_MAX_COUNT = 3
     
     TAX_GROUPS_MAP = {
       1 => "\xc0",
@@ -44,12 +45,9 @@ module Extface
     include Extface::Driver::Daisy::CommandsFx1200
 
     def handle(buffer) #buffer is filled with multiple pushes, wait for full frame (ACKs)STX..PA2..PA1..ETX
-      if frame_len = buffer.index("\x03") || buffer.index("\x16") || buffer.index("\x15")
-        rpush buffer[0..frame_len]
-        return frame_len+1 # return number of bytes processed
-      else
-        #TODO check buffer.length
-        return 0 #no bytes processed
+      if i = buffer.index("\x03") || buffer.index("\x16") || buffer.index("\x15")
+        rpush buffer[0..i]
+        return i + 1 # return number of bytes processed
       end
     end
     
@@ -209,6 +207,8 @@ module Extface
       result = false
       invalid_frames = 0
       nak_messages = 0
+      no_resp = 0
+      flush # fix mysterious double packet response, #TODO send 2 commands and then read 2 responses may fail
       push packet_data
       ACKS_MAX_WAIT.times do |retries|
         errors.clear
@@ -236,6 +236,13 @@ module Extface
               end
             end
             push packet_data unless resp.ack?
+          end
+        else
+          no_resp += 1
+          if no_resp > NO_RESP_MAX_COUNT
+            p "No reply in #{NO_RESP_MAX_COUNT * RESPONSE_TIMEOUT} seconds. Abort!"
+            errors.add :base, "No reply in #{NO_RESP_MAX_COUNT * RESPONSE_TIMEOUT} seconds. Abort!"
+            return result
           end
         end
         errors.add :base, "#{ACKS_MAX_WAIT} ACKs Received. Abort!"

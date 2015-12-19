@@ -7,6 +7,7 @@ module Extface
     ACKS_MAX_WAIT = 60 #count / nothing is forever
     NAKS_MAX_COUNT = 3 #count
     BAD_SEQ_MAX_COUNT = 3
+    NO_RESP_MAX_COUNT = 3
     
     TAX_GROUPS_MAP = {
       1 => "\xc0",
@@ -173,6 +174,8 @@ module Extface
       result = false
       invalid_frames = 0 #counter for bad responses
       nak_messages = 0 #counter for rejected packets (should re-transmit the packet)
+      no_resp = 0
+      flush #prevent double packet response issue like daisy driver
       push packet_data #send packet
       ACKS_MAX_WAIT.times do |retries|
         errors.clear
@@ -200,6 +203,13 @@ module Extface
               end
             end
             push packet_data unless resp.ack?
+          end
+        else
+          no_resp += 1
+          if no_resp > NO_RESP_MAX_COUNT
+            p "No reply in #{NO_RESP_MAX_COUNT * RESPONSE_TIMEOUT} seconds. Abort!"
+            errors.add :base, "No reply in #{NO_RESP_MAX_COUNT * RESPONSE_TIMEOUT} seconds. Abort!"
+            return result
           end
         end
         errors.add :base, "#{ACKS_MAX_WAIT} ACKs Received. Abort!"

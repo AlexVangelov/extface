@@ -17,3 +17,9 @@ datecs_fp550:
   name: Datect FP550
   extfaceable: one(Shop)
   driver: datecs_fp550
+  
+daisy_fx1200:
+  uuid: daisy_fx1200
+  name: Daisy Fx1200
+  extfaceable: one(Shop)
+  driver: daisy_fx1200

@@ -11,7 +11,7 @@ module Extface
       assert_equal nil, @driver.handle('bad packet')
       assert_equal 6, @driver.handle("\x01data\x03data"), "Frame not match"
       assert_equal 9, @driver.handle("pre\x01data\x03data"), "Frame with preamble not match"
-      assert_equal 1, @driver.handle("\x16\x16\x01data\x03data"), "Frame with ACK preamble not match"
+      assert_equal 8, @driver.handle("\x16\x16\x01data\x03data"), "Frame with ACK preamble not match"
       assert_equal 4, @driver.handle("pre\x15"), "NAK not match"
     end
     
@@ -53,9 +53,9 @@ module Extface
         result = @driver.fsend(0x2C) # paper move command
       end
       simulate_device_pull(job)
-      @driver.handle("\x01\x2C\x2F\x2D\x50\x04\x88\x80\xC0\x80\x80\xB0\x05\x30\x34\x35\x39\x03".b)
+      @driver.handle("\x01\x31\x20\x4A\x88\x80\xC0\x80\x80\xB8\x04\x88\x80\xC0\x80\x80\xB8\x05\x30\x37\x3A\x34\x03".b)
       simulate_device_pull(job)
-      @driver.handle("\x01\x2C\x2F\x2D\x50\x04\x88\x80\xC0\x80\x80\xB0\x05\x30\x34\x35\x39\x03".b)
+      @driver.handle("\x01\x38\x21\x30\x30\x30\x30\x30\x35\x30\x2C\x30\x30\x30\x30\x34\x39\x04\x80\x80\x88\x80\x80\xB8\x05\x30\x36\x35\x30\x03".b)
       job_thread.join
       assert @driver.errors.empty?
     end

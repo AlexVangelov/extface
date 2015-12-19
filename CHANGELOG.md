@@ -1,6 +1,14 @@
+## 0.5.1
+  - Fix Daisy double packet response issue
+  - Fix tests
+
+## 0.5.0
+  - Ignore invalid sequence packets (Daisy & Datecs)
+
 ## 0.4.7
   - Datecs FP550 go alive.
   - Daisy FX1200 full errors collection.
+
 ## 0.4.5
   - Datect FP550 layer. Paper cut.
   

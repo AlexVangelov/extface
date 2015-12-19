@@ -11,3 +11,6 @@ star_scp700:
 
 datecs_fp550:
   type: Extface::Driver::Datecs::Fp550
+
+daisy_fx1200:
+  type: Extface::Driver::DaisyFx1200
