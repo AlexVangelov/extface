@@ -1,3 +1,6 @@
+## 0.5.2
+  - Fix invalid byte sequence exception
+
 ## 0.5.1
   - Fix Daisy double packet response issue
   - Fix tests
