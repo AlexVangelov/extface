@@ -175,6 +175,15 @@ module Extface
         s.notify "Doc Cancel End"
       end
     end
+    
+    def autofix_unclosed_doc
+      if @last_fp_status
+        unless (@last_fp_status[2].ord & 0x20).zero? and (@last_fp_status[2].ord & 0x08).zero?
+          fsend Sales::CANCEL_DOC
+          autocut
+        end
+      end
+    end
 
     #other
     def autocut(partial = true) # return "P" - success, "F" - failed
@@ -212,8 +221,10 @@ module Extface
       push packet_data
       ACKS_MAX_WAIT.times do |retries|
         errors.clear
+        @last_fp_status = nil
         if resp = frecv(RESPONSE_TIMEOUT)
           if resp.valid?
+            @last_fp_status = resp.status
             human_status_errors(resp.status)
             if errors.empty?
               result = resp.data

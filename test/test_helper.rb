@@ -21,7 +21,16 @@ class ActiveSupport::TestCase
   fixtures :all
   
   def simulate_device_pull(job)
-    Extface.redis_block{ |r| sleep 1; r.publish(job.id, "OK") } #simulate send to device
+    result = nil
+    Extface.redis_block do |r|
+      list, data = r.blpop(job.id, timeout: 1)
+      while data
+        result = data
+        r.publish(job.id, "OK")
+        list, data = r.blpop(job.id, timeout: 1)
+      end
+    end #simulate send to device
+    result
   end
 end
 module Extface

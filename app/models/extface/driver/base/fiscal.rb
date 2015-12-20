@@ -54,6 +54,8 @@ module Extface
       
     #other
     def payed_recv_account(value = 0.00, payment_type_num = 0) raise_not_implemented end
+      
+    def autofix_unclosed_doc() nil end #if applicable
     
     class SaleItem
       include ActiveModel::Validations
@@ -78,6 +80,7 @@ module Extface
       if detailed
         device.session("Fiscal Doc") do |s|
           s.notify "Fiscal Doc Start"
+          s.autofix_unclosed_doc
           s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
           bill.charges.each do |charge|
@@ -117,6 +120,7 @@ module Extface
       else #not detailed
         device.session("Fiscal Doc") do |s|
           s.notify "Fiscal Doc Start"
+          s.autofix_unclosed_doc
           s.open_fiscal_doc(operator_mapping.try(:mapping), operator_mapping.try(:pwd))
           s.notify "Register Sale"
           total_modifier = nil # send payments sum, so modifier make no sence! think
