@@ -1,3 +1,6 @@
+## 0.5.3
+  - Daisy/Datecs do not stop on invalid sequence if correct one is next
+
 ## 0.5.2
   - Fix invalid byte sequence exception
 

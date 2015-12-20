@@ -55,6 +55,22 @@ module Extface
       job_thread.join
       assert @driver.errors.empty?
     end
+    
+    test "sequence mismatch" do
+      job = extface_jobs(:one)
+      job_thread = Thread.new do
+        @driver.set_job(job)
+        result = @driver.fsend(0x2C) # paper move command
+      end
+      simulate_device_pull(job)
+      @driver.handle("\x01\x31\x20\x4A\x88\x80\xC0\x80\x80\xB8\x04\x88\x80\xC0\x80\x80\xB8\x05\x30\x37\x3A\x34\x03")
+      simulate_device_pull(job)
+      @driver.handle("\x01\x31\x20\x4A\x88\x80\xC0\x80\x80\xB8\x04\x88\x80\xC0\x80\x80\xB8\x05\x30\x37\x3A\x34\x03")
+      simulate_device_pull(job)
+      @driver.handle("\x01\x38\x21\x30\x30\x30\x30\x30\x33\x37\x2C\x30\x30\x30\x30\x33\x36\x04\x80\x80\x88\x80\x80\xB8\x05\x30\x36\x35\x31\x03")
+      job_thread.join
+      assert @driver.errors.empty?
+    end
   end
 end
 

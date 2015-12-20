@@ -253,12 +253,14 @@ module Extface
     def frecv(timeout) # return RespFrame or nil
       rframe = nil
       BAD_SEQ_MAX_COUNT.times do
+        errors.clear
         if frame_bytes = pull(timeout)
           rframe = RespFrame.new(frame_bytes.b)
           if rframe.seq.nil? || rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
             break
           else
             errors.add :base, "Sequence mismatch"
+            p "Invalid sequence (expected: #{sequence_number(false).to_s(16)}, got: #{rframe.seq.ord.to_s(16)})"
             rframe = nil #invalidate mismatch sequence frame for the last retry
           end
         else

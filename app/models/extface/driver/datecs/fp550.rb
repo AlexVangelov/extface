@@ -220,6 +220,7 @@ module Extface
     def frecv(timeout) # return Frame or nil
       rframe = nil
       BAD_SEQ_MAX_COUNT.times do
+        errors.clear
         if frame_bytes = pull(timeout)
           rframe = Frame.new(frame_bytes.b)
           if rframe.seq.nil? || rframe.seq.ord == sequence_number(false) #accept only current sequence number as reply
