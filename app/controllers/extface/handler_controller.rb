@@ -34,7 +34,7 @@ module Extface
           r.append device.uuid, request.body.read
           @full_buffer = r.get device.uuid
         end
-        while @full_buffer.b.present? && bytes_porcessed = device.driver.pre_handle(@full_buffer.b) #handle more than one valid packet in the buffer
+        while @full_buffer.try(:b).present? && bytes_porcessed = device.driver.pre_handle(@full_buffer.b) #handle more than one valid packet in the buffer
           Extface.redis_block do |r|
             r.set device.uuid, @full_buffer.b[bytes_porcessed..-1]
             @full_buffer = r.get device.uuid

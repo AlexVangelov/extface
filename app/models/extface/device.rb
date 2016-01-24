@@ -32,7 +32,7 @@ module Extface
     end
 
     def session(description = nil)
-      job = jobs.create!(description: description)
+      job = jobs.create!(description: description, started_at: Time.now)
       job.thread = Thread.new do
         Thread.current[:extface_job] = job.id
         ActiveRecord::Base.establish_connection unless ActiveRecord::Base.connection.active?
