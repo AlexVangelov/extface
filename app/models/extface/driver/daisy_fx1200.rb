@@ -150,6 +150,16 @@ module Extface
       fsend(Sales::TOTAL, "\t")
     end
     
+    def payed_recv_account(value = 0.00, payment_type_num = 0)
+      raise "Incorrect Amount Value" if value.zero?
+      device.session("Payed Out / Received on Account (#{value.to_s})") do |s|
+        s.notify "Payed / Received Start"
+        fsend Other::ADD_SUB_SUMS, "" << ("%.2f" % value)
+        status = get_printer_status
+        s.notify "Payed / Received End"
+      end
+    end
+    
     #basket
     def sale_and_pay_items_session(items = [], operator = "1", password = "1")
       device.session("Fiscal Doc") do |s|

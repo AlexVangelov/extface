@@ -1,5 +1,6 @@
 ## 0.5.4
   - Daisy auto fix open doc
+  - Daisy add/recv on account
 
 ## 0.5.3
   - Daisy/Datecs do not stop on invalid sequence if correct one is next

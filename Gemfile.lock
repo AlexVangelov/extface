@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.5.4a)
+    extface (0.5.4b)
       redis
       redis-namespace
 
@@ -35,7 +35,7 @@ GEM
       thread_safe (~> 0.1)
       tzinfo (~> 1.1)
     arel (5.0.1.20140414130214)
-    billing (0.0.4)
+    billing (0.0.7)
       money-rails
       paper_trail
       rails (>= 4.0.5)
