@@ -17,6 +17,12 @@
   <%= render 'object_errors', object: f.object %>
 
   <%= form_group f, :name, :text_field %>
+  <div class='form-group'>
+    <%= f.label(:encoding, class: 'col-sm-2 control-label') %>
+    <div class='col-sm-6 col-md-4'>
+      <%= f.select :encoding, Encoding.aliases.collect{ |k,v| ["#{v} (#{k})", k]}.sort, { include_blank: true }, class: "form-control" %>
+    </div>
+  </div>
 
   <div class="form-group">
     <%= f.label :driver, class: 'col-sm-2 control-label' %>

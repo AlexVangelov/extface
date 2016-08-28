@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.5.5)
+    extface (0.5.6)
       redis
       redis-namespace
 

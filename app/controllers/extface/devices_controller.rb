@@ -100,7 +100,7 @@ module Extface
 
       # Only allow a trusted parameter "white list" through.
       def device_params
-        params.require(:device).permit(:uuid, :name, :driver_class, :driver_id)
+        params.require(:device).permit(:uuid, :name, :driver_class, :driver_id, :encoding)
       end
   end
 end

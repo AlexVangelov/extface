@@ -13,7 +13,14 @@ module Extface
     FISCAL = false #cash registers, fiscal printers
     REPORT = false #only transmit data that must be parsed by handler, CDR, report devices
     
-    alias_method :print, :push
+    #alias_method :print, :push
+    def print(text)
+      if device.encoding.present?
+        push text.encode(device.encoding)
+      else
+        push text
+      end
+    end
     
     def print_test_page(times = 1)
       device.session("Print Test Page") do |s|
