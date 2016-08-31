@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140303123022) do
+ActiveRecord::Schema.define(version: 20160828052036) do
 
   create_table "extface_devices", force: true do |t|
     t.string   "uuid"
@@ -21,6 +21,7 @@ ActiveRecord::Schema.define(version: 20140303123022) do
     t.integer  "driver_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "encoding"
   end
 
   create_table "extface_drivers", force: true do |t|
@@ -39,6 +40,7 @@ ActiveRecord::Schema.define(version: 20140303123022) do
     t.datetime "failed_at"
     t.datetime "completed_at"
     t.datetime "connected_at"
+    t.datetime "started_at"
   end
 
   add_index "extface_jobs", ["device_id"], name: "index_extface_jobs_on_device_id"

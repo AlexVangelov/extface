@@ -23,3 +23,9 @@ daisy_fx1200:
   name: Daisy Fx1200
   extfaceable: one(Shop)
   driver: daisy_fx1200
+
+posiflex_aura80:
+  uuid: posiflex_aura80
+  name: Posiflex Aura80
+  extfaceable: one(Shop)
+  driver: posiflex_aura80

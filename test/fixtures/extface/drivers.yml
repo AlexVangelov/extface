@@ -14,3 +14,6 @@ datecs_fp550:
 
 daisy_fx1200:
   type: Extface::Driver::DaisyFx1200
+
+posiflex_aura80:
+  type: Extface::Driver::Posiflex::Aura80
