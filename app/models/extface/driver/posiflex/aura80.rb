@@ -4,7 +4,7 @@ module Extface
     
     DEVELOPMENT = true #driver is not ready for production (not passing all tests or has major bugs)
     
-    COLUMNS = 49
+    CHAR_COLUMNS = 49
 
     include Extface::Driver::Posiflex::AuraCommands
     
