@@ -60,29 +60,29 @@ module Extface
     end
     
     def print_edges_row(text1, text2)
-      print "#{text1} #{text2.rjust(CHAR_COLUMNS - text1.length - 1)}\r\n"
+      print "#{text1} #{text2.rjust(char_columns - text1.length - 1)}\r\n"
     end
     
     def print_text_price_row(text, price)
       rtext = ("%.2f" % price.to_f)
-      lsize = CHAR_COLUMNS - rtext.length - 1
+      lsize = char_columns - rtext.length - 1
       print "#{text.truncate(lsize).ljust(lsize)} #{rtext}\r\n"
     end
     
     def print_fill_row(pattern)
-      print "\r\n".rjust(CHAR_COLUMNS+2, pattern)
+      print "\r\n".rjust(char_columns + 2, pattern)
     end
     
     def print_rjust_row(text, padstr=' ')
-      print "#{text.truncate(CHAR_COLUMNS).rjust(CHAR_COLUMNS, padstr)}\r\n"
+      print "#{text.truncate(char_columns).rjust(char_columns, padstr)}\r\n"
     end
     
     def print_ljust_row(text, padstr = ' ', margin=0)
-      print "#{text.truncate(CHAR_COLUMNS - margin).ljust(CHAR_COLUMNS - margin)}\r\n"
+      print "#{text.truncate(char_columns - margin).ljust(char_columns - margin)}\r\n"
     end
     
     def print_center_row(text, padstr = ' ')
-      print "#{text.truncate(CHAR_COLUMNS).center(CHAR_COLUMNS, padstr)}\r\n"
+      print "#{text.truncate(char_columns).center(char_columns, padstr)}\r\n"
     end
     
     def printize(bill, detailed = false, payments = true)
@@ -100,6 +100,10 @@ module Extface
         
       end
     end
-    
+  
+    def char_columns
+      self.class::CHAR_COLUMNS
+    end  
   end
+  
 end
