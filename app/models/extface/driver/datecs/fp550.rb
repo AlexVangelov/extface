@@ -241,10 +241,10 @@ module Extface
     def build_packet(cmd, data = "")
       "".b.tap() do |packet|
         packet << STX                     #Preamble. 1 byte long. Value: 01H.
-        packet << 0x20 + 4 + data.length  #Number of bytes from <01> preamble (excluded) to <05> (included) plus the fixed offset of 20H
+        packet << 0x20 + 4 + data.b.length  #Number of bytes from <01> preamble (excluded) to <05> (included) plus the fixed offset of 20H
         packet << sequence_number         #Sequence number of the frame. Length : 1 byte. Value: 20H – FFH.
         packet << cmd                     #Length: 1 byte. Value: 20H - 7FH.
-        packet << data                    #Length: 0 - 218 bytes for Host to printer
+        packet << data.b                  #Length: 0 - 218 bytes for Host to printer
         packet << PA1                     #Post-amble. Length: 1 byte. Value: 05H.
         packet << Frame.bcc(packet[1..-1])#Control sum (0000H-FFFFH). Length: 4 bytes. Value of each byte: 30H-3FH
         packet << ETX                     #Terminator. Length: 1 byte. Value: 03H.
@@ -270,8 +270,8 @@ module Extface
     
     private
       def build_sale_data(item)
-        "".tap() do |data|
-          data << item.text1 unless item.text1.blank?
+        "".b.tap() do |data|
+          data << item.text1.truncate(30) unless item.text1.blank?
           data << "\x0a#{text2}" unless item.text2.blank?
           data << "\t"
           data << TAX_GROUPS_MAP[item.tax_group || 2]
