@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.5.9)
+    extface (0.6.0)
       redis
       redis-namespace
 
@@ -82,7 +82,7 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (10.3.2)
-    redis (3.2.2)
+    redis (3.3.1)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
     sprockets (2.12.1)
@@ -113,4 +113,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   1.10.6
+   1.13.6
