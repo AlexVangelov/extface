@@ -59,6 +59,15 @@ module Extface
       job_thread.join
       assert @driver.errors.empty?
     end
+ 
+    test "build_sale_data encoding" do
+      sale_data = @driver.build_sale_data OpenStruct.new(text1: "012345678901234567890123АБВГДЕ", price: 1)
+      packet = @driver.build_packet 0x00, sale_data
+      assert_equal 39, packet[1].ord - 0x20
+      sale_data = @driver.build_sale_data OpenStruct.new(text1: "012345678901234567890123АБВГДЕЖЗИ", price: 1)
+      packet = @driver.build_packet 0x00, sale_data
+      assert_equal 39, packet[1].ord - 0x20
+    end
   end
 end
 

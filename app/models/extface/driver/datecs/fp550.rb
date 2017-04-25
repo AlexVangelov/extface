@@ -268,20 +268,26 @@ module Extface
       errors.add :base, "Field Overflow" unless (status_1 & 0x01).zero?
     end
     
-    private
-      def build_sale_data(item)
-        "".b.tap() do |data|
-          data << item.text1.truncate(30) unless item.text1.blank?
-          data << "\x0a#{text2}" unless item.text2.blank?
-          data << "\t"
-          data << TAX_GROUPS_MAP[item.tax_group || 2]
-          data << ("%.2f" % item.price)
-          data << "*#{item.qty.to_s}" unless item.qty.blank?
-          data << ",#{item.percent}" unless item.percent.blank?
-          data << ",;#{'%.2f' % item.neto}" unless item.neto.blank?
-        end
-      end
+    def build_sale_data(item)
+      encoded_text1 = device.encoding.present? ? item.text1.encode(device.encoding) : item.text1
+      encoded_text1 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text1 && encoded_text1.b.length > 30
+
+      encoded_text2 = device.encoding.present? ? item.text2.encode(device.encoding) : item.text2
+      encoded_text2 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text2 && encoded_text2.b.length > 30
       
+      "".b.tap() do |data|
+        data << encoded_text1 unless encoded_text1.blank?
+        data << "\x0a#{encoded_text2}" unless encoded_text2.blank?
+        data << "\t"
+        data << TAX_GROUPS_MAP[item.tax_group || 2]
+        data << ("%.2f" % item.price)
+        data << "*#{item.qty.to_s}" unless item.qty.blank?
+        data << ",#{item.percent}" unless item.percent.blank?
+        data << ",;#{'%.2f' % item.neto}" unless item.neto.blank?
+      end
+    end
+
+    private  
       def sequence_number(increment = true)
         @seq ||= 0x1f
         @seq += 1 if increment
