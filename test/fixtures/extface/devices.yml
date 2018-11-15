@@ -23,7 +23,13 @@ datecs_dp25:
   name: Datect DP25
   extfaceable: one(Shop)
   driver: datecs_dp25
-  
+
+datecs_dp35:
+  uuid: datecs_dp35
+  name: Datect DP35
+  extfaceable: one(Shop)
+  driver: datecs_dp35
+    
 daisy_fx1200:
   uuid: daisy_fx1200
   name: Daisy Fx1200
