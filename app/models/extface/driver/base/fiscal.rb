@@ -70,7 +70,7 @@ module Extface
         @price, @text1, @text2, @tax_group, @qty, @percent, @neto, @number = attributes[:price], attributes[:text1].to_s, attributes[:text2].to_s, attributes[:tax_group], attributes[:qty], attributes[:percent], attributes[:neto], attributes[:number]
         raise "invalid price" unless price.kind_of?(Float)
         raise "invalid tax group" if tax_group.present? && !tax_group.kind_of?(Fixnum)
-        raise "invalid qty" if qty.present? && !qty.kind_of(Float)
+        raise "invalid qty" if qty.present? && !qty.kind_of?(Float)
       end
     end
     
@@ -98,7 +98,7 @@ module Extface
                   text1: charge.name,
                   text2: charge.description,
                   tax_group: charge.find_tax_group_mapping_for(self), #find tax group mapping by ratio , not nice
-                  qty: charge.qty,
+                  qty: charge.qty.try(:to_f),
                   neto: neto,
                   percent_ratio: percent_ratio #TODO check format
                 )
