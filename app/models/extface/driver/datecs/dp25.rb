@@ -280,7 +280,7 @@ module Extface
           data << encoded_text1 unless encoded_text1.blank?
           data << "\x0a#{encoded_text2}" unless encoded_text2.blank?
           data << "\t"
-          data << TAX_GROUPS_MAP[item.tax_group || 2]
+          data << TAX_GROUPS_MAP[item.tax_group || 2].b
           data << ("%.2f" % item.price)
           data << "*#{item.qty.to_s}" unless item.qty.blank?
           data << ",#{item.percent}" unless item.percent.blank?
