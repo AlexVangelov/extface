@@ -271,10 +271,10 @@ module Extface
     private
       def build_sale_data(item)
         encoded_text1 = device.encoding.present? ? item.text1.encode(device.encoding).b : item.text1
-        encoded_text1 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text1 && encoded_text1.b.length > 30
+        encoded_text1 = encoded_text1.mb_chars.limit(19).to_s + '...' if encoded_text1 && encoded_text1.b.length > 22
   
         encoded_text2 = device.encoding.present? ? item.text2.encode(device.encoding).b : item.text2
-        encoded_text2 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text2 && encoded_text2.b.length > 30
+        encoded_text2 = encoded_text1.mb_chars.limit(19).to_s + '...' if encoded_text2 && encoded_text2.b.length > 22
         
         "".b.tap() do |data|
           data << encoded_text1 unless encoded_text1.blank?
@@ -282,7 +282,7 @@ module Extface
           data << "\t"
           data << TAX_GROUPS_MAP[item.tax_group || 2].b
           data << ("%.2f" % item.price)
-          data << "*#{item.qty.to_s}" unless item.qty.blank?
+          data << "*#{'%.3f' % item.qty}" unless item.qty.blank?
           data << ",#{item.percent}" unless item.percent.blank?
           data << ",;#{'%.2f' % item.neto}" unless item.neto.blank?
         end
