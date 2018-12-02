@@ -136,6 +136,20 @@ module Extface
                           end
       fsend(Sales::TOTAL, payment_data)
     end
+
+    def add_total_modifier(fixed_value = nil, percent_ratio = nil)
+      raise "Not in fiscal session" unless @fiscal_session
+      subtotal_data = "".tap() do |data|
+          data << "1" #One byte, which if ‘1’ the sum of the subtotal will be printed out.
+          data << "1" #One byte which if ‘1’ the sum of the subtotal will appear on the display.
+          if percent_ratio.nil?
+            data << (";%.2f" % fixed_value) unless fixed_value.blank?
+          else
+            data << (",%d" % (percent_ratio*100).to_i) unless percent_ratio.blank?
+          end
+        end
+      fsend(Sales::SUBTOTAL, subtotal_data)
+    end
     
     def total_payment
       raise "Not in fiscal session" unless @fiscal_session
