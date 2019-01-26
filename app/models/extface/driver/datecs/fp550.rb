@@ -269,12 +269,19 @@ module Extface
     end
     
     def build_sale_data(item)
-      encoded_text1 = device.encoding.present? ? item.text1.encode(device.encoding).b : item.text1
-      encoded_text1 = encoded_text1.mb_chars.slice!(0..27).to_s.b + '...' if encoded_text1 && encoded_text1.b.length > 30
+      # encoded_text1 = device.encoding.present? ? item.text1.encode(device.encoding).b : item.text1
+      # encoded_text1 = encoded_text1.mb_chars.slice!(0..27).to_s.b + '...' if encoded_text1 && encoded_text1.b.length > 30
 
-      encoded_text2 = device.encoding.present? ? item.text2.encode(device.encoding).b : item.text2
-      encoded_text2 = encoded_text2.mb_chars.slice!(0..27).to_s.b + '...' if encoded_text2 && encoded_text2.b.length > 30
+      # encoded_text2 = device.encoding.present? ? item.text2.encode(device.encoding).b : item.text2
+      # encoded_text2 = encoded_text2.mb_chars.slice!(0..27).to_s.b + '...' if encoded_text2 && encoded_text2.b.length > 30
       
+      #http://extface.com/pos/fpi/bills/171257
+      encoded_text1 = device.encoding.present? ? item.text1.encode(device.encoding) : item.text1
+      encoded_text1 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text1 && encoded_text1.b.length > 30
+
+      encoded_text2 = device.encoding.present? ? item.text2.encode(device.encoding) : item.text2
+      encoded_text2 = encoded_text1.mb_chars.limit(27).to_s + '...' if encoded_text2 && encoded_text2.b.length > 30
+
       "".b.tap() do |data|
         data << encoded_text1 unless encoded_text1.blank?
         data << "\x0a#{encoded_text2}" unless encoded_text2.blank?
