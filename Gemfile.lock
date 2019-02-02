@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    extface (0.7.0)
+    extface (0.7.1)
       redis
       redis-namespace
 
@@ -158,4 +158,4 @@ DEPENDENCIES
   sqlite3
 
 BUNDLED WITH
-   1.16.0
+   1.17.3
