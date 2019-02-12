@@ -1,0 +1,12 @@
+
+<%= button_to 'Paper Cut', fiscal_device_path(@device), remote: true, name: :paper_cut, value: true, class: 'btn btn-warning'  %>
+
+<%= button_to 'Non Fiscal Test', fiscal_device_path(@device), remote: true, name: :non_fiscal_test, value: true, class: 'btn btn-warning' %>
+
+<%= button_to 'Fiscal Test', fiscal_device_path(@device), remote: true, name: :fiscal_test, value: true, class: 'btn btn-warning' %>
+
+<%= button_to 'X Report', fiscal_device_path(@device), remote: true, name: :x_report, value: true, class: 'btn btn-warning' %>
+<%= button_to 'Z Report', fiscal_device_path(@device), remote: true, name: :z_report, value: true, class: 'btn btn-warning' %>
+
+<%= button_to 'Cancel Fiscal Doc', fiscal_device_path(@device), remote: true, name: :cancel_fiscal_doc, value: true, class: 'btn btn-danger' %>
+

@@ -15,6 +15,9 @@ datecs_fp550:
 datecs_dp25:
   type: Extface::Driver::Datecs::Dp25
 
+datecs_dpX5_new:
+  type: Extface::Driver::Datecs::DpX5New
+
 datecs_dp35:
   type: Extface::Driver::Datecs::Dp35
   

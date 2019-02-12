@@ -24,6 +24,12 @@ datecs_dp25:
   extfaceable: one(Shop)
   driver: datecs_dp25
 
+datecs_dpX5_new:
+  uuid: datecs_dpX5new
+  name: Datect DPX5 New
+  extfaceable: one(Shop)
+  driver: datecs_dpX5_new
+
 datecs_dp35:
   uuid: datecs_dp35
   name: Datect DP35
