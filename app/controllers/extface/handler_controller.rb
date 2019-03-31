@@ -70,14 +70,20 @@ module Extface
         # find current job or get new one
         Extface.redis_block do |r|
             start = Time.now
+            isRetry = false
             if job = device.jobs.active.find_by(id: cookies[:extface]) || device.jobs.active.try(:first)
               cookies.permanent[:extface] = job.id
               p "Processing job #{job.id}"
               list, data = r.blpop(job.id, timeout: 1)
-              while data
-                response.stream.write data
-                r.publish(job.id, "OK")
-                if (Time.now - start) > 1.8.seconds
+              while (data || !isRetry)
+                if data
+                  response.stream.write data
+                  r.publish(job.id, "OK")
+                  isRetry = false
+                else #retry
+                  isRetry = true
+                end
+                if (Time.now - start) > 2.8.seconds
                   p "############ Will continue next time"
                   break
                 end
